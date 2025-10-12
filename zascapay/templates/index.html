@@ -1,0 +1,195 @@
+{% load static %}
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gemdev – Tailwind Landing</title>
+  <link rel="icon" href="{% static 'images/header-gem.svg' %}">
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+<body class="antialiased text-slate-700">
+  <!-- Header / Hero -->
+  <header class="relative overflow-hidden bg-gem-dark text-white">
+    <nav class="container mx-auto px-4 py-6 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 font-semibold">
+        <img class="h-7 w-7" src="{% static 'images/header-gem.svg' %}" alt="Gemdev" />
+        <span>Gemdev</span>
+      </a>
+      <div class="hidden md:flex items-center gap-8 text-sm">
+        <a href="#details" class="hover:text-gem-light/80">Details</a>
+        <a href="#features" class="hover:text-gem-light/80">Features</a>
+        <a href="#about" class="hover:text-gem-light/80">About</a>
+        <a href="#contact" class="hover:text-gem-light/80">Contact</a>
+      </div>
+    </nav>
+
+    <div class="container mx-auto px-4 pb-24 pt-6 md:pt-16">
+      <div class="grid md:grid-cols-2 items-center gap-10">
+        <div class="max-w-xl">
+          <h1 class="text-3xl md:text-5xl font-extrabold leading-tight">
+            Gemdev is a free HTML template designed for your web products
+          </h1>
+          <p class="mt-5 text-gem-light/90 md:text-lg">
+            Use Gemdev to create awesome websites for your products, services and ideas in a short amount of time.
+          </p>
+          <div class="mt-8">
+            <a href="#details" class="inline-block rounded-full bg-white text-gem-dark font-semibold px-6 py-3 shadow hover:bg-gem-light transition">Discover</a>
+          </div>
+        </div>
+        <div class="relative">
+          <img src="{% static 'images/header-gem.svg' %}" alt="Gem illustration" class="mx-auto w-4/5 md:w-full drop-shadow-2xl" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Wave divider -->
+    <div class="pointer-events-none select-none">
+      <img src="{% static 'images/wave.svg' %}" alt="wave" class="w-full translate-y-1" />
+    </div>
+  </header>
+
+  <!-- Intro Section -->
+  <section id="about" class="container mx-auto px-4 py-16 md:py-24">
+    <div class="mx-auto max-w-3xl text-center">
+      <h2 class="text-2xl md:text-3xl font-bold">The framework is a solid foundation for websites</h2>
+      <p class="mt-4 text-slate-600">I've designed this framework based on years of building websites across many industries. It's easy enough for beginners and powerful for teams.</p>
+    </div>
+  </section>
+
+  <!-- Two feature rows -->
+  <section id="details" class="container mx-auto px-4 pb-6 md:pb-10">
+    <div class="grid md:grid-cols-2 gap-10 items-center py-8">
+      <img src="{% static 'images/about.svg' %}" alt="Cloud" class="w-3/4 md:w-4/5 mx-auto" />
+      <div>
+        <h3 class="text-xl md:text-2xl font-bold">Easy to download</h3>
+        <p class="mt-3 text-slate-600">It takes less than 1 minute to download the framework. You will get a clean, ready to work project. You'll keep improvements in a couple of hours.</p>
+        <a href="#features" class="mt-5 inline-block text-white bg-gem-dark hover:bg-gem-mid px-5 py-2 rounded-full">Learn more</a>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-10 items-center py-8 md:py-14">
+      <div class="order-2 md:order-1">
+        <h3 class="text-xl md:text-2xl font-bold">Simple to setup</h3>
+        <p class="mt-3 text-slate-600">Gemdev is a well structured project and very easy to setup the parameters. You can get up and running with basic coding skills. Works great for popular tools and frameworks.</p>
+        <a href="#features" class="mt-5 inline-block text-white bg-gem-dark hover:bg-gem-mid px-5 py-2 rounded-full">Details</a>
+      </div>
+      <img src="{% static 'images/details-1.svg' %}" alt="Details 1" class="w-3/4 md:w-4/5 mx-auto order-1 md:order-2" />
+    </div>
+  </section>
+
+  <!-- Feature cards grid -->
+  <section id="features" class="bg-gem-light/60 py-16 md:py-24">
+    <div class="container mx-auto px-4">
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="bg-white rounded-2xl p-6 shadow-card">
+          <h4 class="font-semibold text-lg">Web framework</h4>
+          <p class="mt-2 text-slate-600">Well structured project to help people build websites and apps fast.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-card">
+          <h4 class="font-semibold text-lg">Unlimited components</h4>
+          <p class="mt-2 text-slate-600">Get cards, lists, image sliders and everything you need.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-card">
+          <h4 class="font-semibold text-lg">Easy to download</h4>
+          <p class="mt-2 text-slate-600">Click the green download button, the package will download instantly.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-card">
+          <h4 class="font-semibold text-lg">Simple to setup</h4>
+          <p class="mt-2 text-slate-600">You can configure Gemdev within minutes with a small checklist.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-card">
+          <h4 class="font-semibold text-lg">Simple licensing</h4>
+          <p class="mt-2 text-slate-600">Use it for any kind of project and any number of times.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-card">
+          <h4 class="font-semibold text-lg">Great results</h4>
+          <p class="mt-2 text-slate-600">A short time to value with clear documentation and examples.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Secondary details -->
+  <section class="container mx-auto px-4 py-16 md:py-24">
+    <div class="grid md:grid-cols-2 gap-10 items-center">
+      <img src="{% static 'images/details-2.svg' %}" alt="Details 2" class="w-3/4 md:w-4/5 mx-auto" />
+      <div>
+        <h3 class="text-xl md:text-2xl font-bold">Award winning framework</h3>
+        <p class="mt-3 text-slate-600">Naturally we can't win prizes everyday, but this starter aims for best practices, speed and performance.</p>
+      </div>
+    </div>
+    <div class="grid md:grid-cols-2 gap-10 items-start mt-12">
+      <div>
+        <h3 class="text-xl md:text-2xl font-bold">Reasons to download</h3>
+        <ul class="mt-4 space-y-3 text-slate-600 list-disc list-inside">
+          <li>Very easy to interact with minimum number of clicks.</li>
+          <li>Large pool of components ready to start your project.</li>
+          <li>Simple licensing for any project size.</li>
+          <li>Consistent updates that keep improving.</li>
+        </ul>
+      </div>
+      <div class="grid grid-cols-2 gap-6">
+        <div class="rounded-2xl bg-gem-light/70 p-6 text-center">
+          <div class="text-3xl font-extrabold text-gem-dark">1</div>
+          <div class="text-sm mt-1 text-slate-600">Happy users</div>
+        </div>
+        <div class="rounded-2xl bg-gem-light/70 p-6 text-center">
+          <div class="text-3xl font-extrabold text-gem-dark">1</div>
+          <div class="text-sm mt-1 text-slate-600">Issues solved</div>
+        </div>
+        <div class="rounded-2xl bg-gem-light/70 p-6 text-center">
+          <div class="text-3xl font-extrabold text-gem-dark">1</div>
+          <div class="text-sm mt-1 text-slate-600">Good reviews</div>
+        </div>
+        <div class="rounded-2xl bg-gem-light/70 p-6 text-center">
+          <div class="text-3xl font-extrabold text-gem-dark">1</div>
+          <div class="text-sm mt-1 text-slate-600">Orders received</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA panel -->
+  <section class="relative bg-gradient-to-b from-white to-gem-light/60 py-14">
+    <div class="container mx-auto px-4">
+      <div class="rounded-2xl bg-white p-10 md:p-14 shadow-card text-center">
+        <h3 class="text-xl md:text-2xl font-bold">Gemdev is a well established web development framework dedicated to creatives and makers</h3>
+        <a href="#contact" class="mt-6 inline-block text-white bg-gem-dark hover:bg-gem-mid px-6 py-3 rounded-full">Details</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="container mx-auto px-4 py-16 md:py-24">
+    <h3 class="text-center text-2xl font-bold">Contact details</h3>
+    <p class="mt-2 text-center text-slate-600">Don't hesitate to send your question through the contact form or email@example.com</p>
+
+    <form class="mt-8 mx-auto max-w-3xl grid gap-4">
+      <input type="text" placeholder="Name" class="w-full rounded-lg border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+      <input type="email" placeholder="Email" class="w-full rounded-lg border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+      <textarea rows="6" placeholder="Your message" class="w-full rounded-lg border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gem-mid"></textarea>
+      <button type="submit" class="justify-self-start rounded-full bg-gem-dark px-6 py-3 text-white font-semibold hover:bg-gem-mid">Submit Message</button>
+    </form>
+  </section>
+
+  <footer class="border-t py-10">
+    <div class="container mx-auto px-4">
+      <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+        <p class="text-sm text-slate-500">Copyright © Your name</p>
+        <div class="flex items-center gap-4 text-slate-500">
+          <a href="#" class="hover:text-gem-dark" aria-label="Facebook">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path d="M22 12.07C22 6.48 17.52 2 11.93 2S2 6.48 2 12.07C2 17.1 5.66 21.2 10.44 22v-7.02H7.9v-2.91h2.54V9.41c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.87h2.78l-.44 2.91h-2.34V22C18.34 21.2 22 17.1 22 12.07z"/></svg>
+          </a>
+          <a href="#" class="hover:text-gem-dark" aria-label="Twitter">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path d="M22.46 6c-.77.35-1.6.58-2.46.69a4.27 4.27 0 0 0 1.88-2.36 8.54 8.54 0 0 1-2.71 1.04 4.26 4.26 0 0 0-7.39 3.88 12.1 12.1 0 0 1-8.78-4.45 4.26 4.26 0 0 0 1.32 5.68 4.22 4.22 0 0 1-1.93-.53v.05a4.26 4.26 0 0 0 3.42 4.17 4.26 4.26 0 0 1-1.92.07 4.27 4.27 0 0 0 3.98 2.96A8.55 8.55 0 0 1 2 19.54 12.07 12.07 0 0 0 8.52 21.5c7.23 0 11.19-5.99 11.19-11.19 0-.17 0-.34-.01-.5A7.99 7.99 0 0 0 22.46 6z"/></svg>
+          </a>
+          <a href="#" class="hover:text-gem-dark" aria-label="Instagram">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="h-5 w-5"><path d="M7 2C4.24 2 2 4.24 2 7v10c0 2.76 2.24 5 5 5h10c2.76 0 5-2.24 5-5V7c0-2.76-2.24-5-5-5H7zm10 2c1.65 0 3 1.35 3 3v10c0 1.65-1.35 3-3 3H7c-1.65 0-3-1.35-3-3V7c0-1.65 1.35-3 3-3h10zM12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm5.5-.75a1.25 1.25 0 1 0 0 2.5 1.25 1.25 0 0 0 0-2.5z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

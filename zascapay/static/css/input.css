@@ -1,0 +1,13 @@
+@import "tailwindcss";
+
+/* Tell Tailwind what files to scan for class names */
+@source "../../templates/**/*.html";
+
+/* Custom design tokens used in index.html */
+@theme {
+  --color-gem-dark: #232a6b;
+  --color-gem-mid: #2f3aa8;
+  --color-gem-light: #eef2ff;
+  --shadow-card: 0 10px 25px -10px rgba(0, 0, 0, 0.15);
+}
+

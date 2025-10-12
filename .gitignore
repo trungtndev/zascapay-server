@@ -1,0 +1,83 @@
+# =========================
+# Django / Python
+# =========================
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*$py.class
+
+# Database
+db.sqlite3
+*.db
+*.sqlite3
+
+# Environment
+.env
+*.env
+venv/
+env/
+ENV/
+.venv/
+server/
+
+# Conda environment
+*.conda
+*.egg-info/
+*.egg/
+conda-meta/
+
+# =========================
+# Build & Bytecode
+# =========================
+build/
+dist/
+*.egg-info/
+.eggs/
+*.manifest
+*.spec
+
+# =========================
+# IDE & Editors
+# =========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# =========================
+# Logs & Cache
+# =========================
+*.log
+*.pot
+*.mo
+*.pyc
+*.pyo
+*.pyd
+*.pdb
+*.tmp
+*.cache
+*.pytest_cache/
+.DS_Store
+
+# =========================
+# Django Static / Media
+# =========================
+staticfiles/
+static_root/
+media/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+
+# =========================
+# Migrations (optional)
+# =========================
+# Uncomment nếu bạn không muốn lưu migrations tự động tạo:
+# */migrations/*
+# !*/migrations/__init__.py
