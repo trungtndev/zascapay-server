@@ -5,16 +5,38 @@
 
 /* Custom design tokens used in index.html */
 @theme {
-  --color-gem-dark: #232a6b;
-  --color-gem-mid: #2f3aa8;
-  --color-gem-light: #eef2ff;
+  /* user palette */
+  --color-primary: #FF5722;    /* primary */
+  --color-secondary: #6200EA;  /* secondary */
+  --color-accent: #3F51B5;     /* accent */
+  --color-warning: #F44336;    /* warning */
+  --color-text: #FFFFFF;       /* text (for contrast on colored backgrounds) */
+  --background: linear-gradient(135deg, #FF5722 0%, #6200EA 100%);
+  --shadow-card: 0 10px 25px -10px rgba(0, 0, 0, 0.15);
+}
+
+/* Provide runtime CSS variables for browsers that read them directly */
+:root {
+  /* runtime user palette */
+  --color-primary: #FF5722;
+  --color-secondary: #6200EA;
+  --color-accent: #3F51B5;
+  --color-warning: #F44336;
+  --color-text: #FFFFFF;
+  --background: linear-gradient(135deg, #FF5722 0%, #6200EA 100%);
   --shadow-card: 0 10px 25px -10px rgba(0, 0, 0, 0.15);
 }
 
 /* Reusable utilities */
-.card-feature { @apply h-full rounded-2xl p-6 shadow-card border border-slate-200/60 flex flex-col transition-transform hover:-translate-y-0.5 bg-gem-light; }
+.card-feature { @apply h-full rounded-2xl p-6 shadow-card border border-slate-200/60 flex flex-col transition-transform hover:-translate-y-0.5; background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.9)); }
+.card-feature--accent { @apply h-full rounded-2xl p-6 shadow-card border border-slate-200/60 flex flex-col transition-transform hover:-translate-y-0.5; background: var(--background); color: var(--color-text); }
 .badge { @apply mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white; }
-.cta-box { @apply mx-auto max-w-4xl rounded-2xl p-10 md:p-12 border border-slate-200/70 text-center bg-gem-light; }
+.cta-box { @apply mx-auto max-w-4xl rounded-2xl p-10 md:p-12 border border-slate-200/70 text-center; background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.92)); }
+
+/* Gradient helpers */
+.logo-gradient { background: var(--background); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.btn-gradient { background: var(--background); color: var(--color-text); border: none; padding: .5rem 1rem; border-radius: .75rem; box-shadow: 0 6px 18px rgba(0,0,0,0.12); }
+.btn-gradient:active { transform: translateY(1px); }
 
 /*****************/
 /*    Header     */
@@ -62,3 +84,26 @@
   50% { transform: translate3d(0, 5px, 0); }
 }
 /* end of wave animation */
+
+/* Legacy gem class mappings (map old utility names to new palette) */
+.bg-gem-dark { background: var(--color-primary); }
+.bg-gem-mid { background: var(--color-accent); }
+.bg-gem-light { background: rgba(255,255,255,0.96); }
+.text-gem-light { color: rgba(255,255,255,0.95); }
+.text-gem-dark { color: var(--color-primary); }
+/* hover helpers: note the backslash escapes the colon in class name so Tailwind-like classes still work in templates */
+.hover\:bg-gem-mid:hover { background: var(--color-accent); }
+.hover\:bg-gem-light:hover { background: rgba(255,255,255,0.96); }
+
+/* end legacy mappings */
+
+/* Only header and its nav should use the gradient background */
+.header { background: var(--background); color: var(--color-text); }
+.header nav { /* slightly translucent gradient to mimic /90 */
+  background: linear-gradient(135deg, rgba(255,87,34,0.92) 0%, rgba(98,0,234,0.92) 100%);
+  color: var(--color-text);
+}
+
+/* Solid primary button for the rest of the site (non-gradient) */
+.btn-primary { background: var(--color-primary); color: var(--color-text); border: none; padding: .5rem 1rem; border-radius: .75rem; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+.btn-primary:active { transform: translateY(1px); }
