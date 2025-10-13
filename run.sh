@@ -9,9 +9,12 @@ set -e
 # ===============================
 # 2️⃣  Cài Python dependencies
 # ===============================
+pwd
+ls
+
 echo "🐍 Installing Python dependencies..."
 if [ -f requirements.txt ]; then
-    pip install -r requirements.txt
+    pip install -r requirements.txt -qq
 else
     echo "⚠️  requirements.txt not found!"
 fi
