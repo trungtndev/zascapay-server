@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-4*wgx-mp!dgol!e5*5v_24h#3qm#n(0mbq=7)ryb7t7xez5=@&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -136,3 +136,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model (single concrete user table)
 AUTH_USER_MODEL = 'user.User'
+
+# Media files (uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

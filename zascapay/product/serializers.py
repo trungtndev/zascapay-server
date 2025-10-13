@@ -17,6 +17,8 @@ class ProductCategorySerializer(serializers.ModelSerializer):
 
 class ProductSerializer(serializers.ModelSerializer):
     category_name = serializers.CharField(source='category.name', read_only=True)
+    status_display = serializers.SerializerMethodField()
+    created_at = serializers.DateTimeField(read_only=True)
 
     class Meta:
         model = Product
@@ -28,14 +30,23 @@ class ProductSerializer(serializers.ModelSerializer):
             'category',
             'category_name',
             'status',
+            'status_display',
             'accuracy_rate',
             'detection_count',
             'last_detected_at',
             'last_updated_at',
+            'created_at',
             'image_url',
+            'price',
             'is_deleted',
         ]
-        read_only_fields = ['id', 'last_updated_at']
+        read_only_fields = ['id', 'last_updated_at', 'created_at']
+
+    def get_status_display(self, obj):
+        try:
+            return obj.get_status_display()
+        except Exception:
+            return obj.status
 
     def validate_accuracy_rate(self, value):
         if value is None:
@@ -43,4 +54,3 @@ class ProductSerializer(serializers.ModelSerializer):
         if value < 0 or value > 100:
             raise serializers.ValidationError('accuracy_rate phải nằm trong khoảng 0..100 (phần trăm).')
         return value
-

@@ -1,0 +1,77 @@
+{% load static %}
+
+<!-- Modal: View Product Details -->
+<div id="viewProductModal" class="fixed inset-0 bg-black/30 hidden items-center justify-center z-50">
+  <div class="w-full max-w-[1100px] mx-4 rounded-2xl bg-white shadow-md overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="viewProductTitle">
+    <div class="product-modal-scroll">
+      <div class="px-4 py-3 flex items-center justify-between sticky-header border-b border-slate-200 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <h3 id="viewProductTitle" class="font-semibold text-lg">Chi Tiết Sản Phẩm</h3>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="vpEditBtn" class="px-3 py-1 rounded-lg border border-slate-200 bg-white text-sm">Chỉnh Sửa</button>
+          <button id="vpCloseBtn" class="flex items-center gap-2 text-slate-600 hover:bg-slate-100 px-3 py-1 rounded-md" type="button" aria-label="Đóng" title="Đóng">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div class="lg:col-span-2">
+          <div class="mb-4">
+            <h2 id="vpProductName" class="text-2xl font-bold">Tên sản phẩm</h2>
+            <div id="vpProductSubtitle" class="text-sm text-slate-500 mt-1">Danh mục • Mã SP: ...</div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-[#f5f8ff] p-6">
+            <h3 class="font-medium mb-4">Hình Ảnh Sản Phẩm</h3>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div class="col-span-1">
+                <div class="w-full h-72 rounded-2xl bg-slate-100 overflow-hidden flex items-center justify-center" id="vpMainImageWrapper">
+                  <img id="vpMainImage" src="{% static 'images/avt.svg' %}" alt="Ảnh chính" class="object-contain max-h-full max-w-full" />
+                </div>
+              </div>
+              <div class="md:col-span-2">
+                <div id="vpImages" class="flex gap-4 items-start">
+                  <!-- thumbnails inserted here -->
+                </div>
+                <div class="mt-4 p-3 border border-dashed rounded-lg text-center text-slate-600">+ Thêm Hình Ảnh Khác (chỉ hiển thị)</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <aside class="space-y-4">
+          <div class="rounded-2xl border border-slate-200 bg-[#eef3ff] p-5">
+            <h4 class="font-semibold mb-3">Trạng Thái Nhận Diện</h4>
+            <div class="text-sm text-slate-600 grid grid-cols-2 gap-y-2">
+              <div>Trạng Thái</div><div id="vpStatus" class="text-right font-medium">—</div>
+              <div>Độ Chính Xác</div><div id="vpAccuracy" class="text-right font-medium">—</div>
+              <div>Tổng Số Lần Nhận Diện</div><div id="vpDetectionCount" class="text-right font-medium">0</div>
+              <div>Lần Nhận Diện Cuối</div><div id="vpLastDetected" class="text-right">—</div>
+            </div>
+          </div>
+
+          <div class="rounded-2xl border border-slate-200 bg-[#f7f9fe] p-5">
+            <h4 class="font-semibold mb-3">Thông Tin Sản Phẩm</h4>
+            <div class="text-sm text-slate-600 grid grid-cols-2 gap-y-3">
+              <div>Danh Mục</div><div id="vpCategory" class="text-right">—</div>
+              <div>Giá</div><div id="vpPrice" class="text-right font-medium">—</div>
+              <div>Mã Vạch</div><div id="vpBarcode" class="text-right">—</div>
+              <div>Ngày Thêm</div><div id="vpCreatedAt" class="text-right">—</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* small utility: thumbnail styles */
+#vpImages img { width: 160px; height: 120px; object-fit: cover; border-radius: 8px; }
+#vpImages .thumb { background: #f2f5fb; padding: 6px; border-radius: 8px; }
+</style>
+

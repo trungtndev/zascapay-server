@@ -2,6 +2,7 @@
 
 sudo apt update
 sudo apt install pkg-config libmysqlclient-dev build-essential -y
+sudo apt install gunicorn
 
 # shellcheck disable=SC2164
 cd "$(pwd)/zascapay"

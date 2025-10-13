@@ -37,12 +37,13 @@ class Product(models.Model):
         db_column='category_id',
     )
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.ACTIVE)
-    accuracy_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0)  # store percent, e.g. 94.25
+    accuracy_rate = models.DecimalField(max_digits=5, decimal_places=2, default=0, null=True)  # store percent, e.g. 94.25
     detection_count = models.PositiveIntegerField(default=0)
     last_detected_at = models.DateTimeField(blank=True, null=True)
     last_updated_at = models.DateTimeField(auto_now=True)
     image_url = models.URLField(blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     class Meta:
         db_table = 'product'

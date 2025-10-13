@@ -1,11 +1,6 @@
-from django.urls import include, path
-from rest_framework.routers import DefaultRouter
+from django.urls import path
 
 from .views import ProductPageView, ProductViewSet, ProductCategoryViewSet
-
-# router = DefaultRouter()
-# router.register(r'products', ProductViewSet, basename='product')
-# router.register(r'categories', ProductCategoryViewSet, basename='product-category')
 
 urlpatterns = [
     # HTML page (Hybrid View-API): /product/

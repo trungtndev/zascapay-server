@@ -1,0 +1,50 @@
+{% load static %}
+<aside class="hidden md:flex md:flex-col fixed inset-y-0 left-0 w-64 bg-white border-r border-slate-200/70">
+    <nav class="p-3 text-sm">
+        <!-- User info -->
+        <div class="px-3 py-4 mb-2 flex flex-col items-center gap-2">
+            <img class="h-8 w-8 rounded-full" src="{% static 'images/avt.svg' %}"
+                 alt="{{ request.user.username|default:'User' }}"/>
+            <div class="w-full text-center leading-tight">
+                <div class="text-sm font-medium truncate">{% if request.user.is_authenticated %}
+                    {{ request.user.get_full_name|default:request.user.username }}{% else %}Khách{% endif %}</div>
+                {% if request.user.is_authenticated and request.user.email %}
+                    <div class="text-xs text-slate-500 truncate">{{ request.user.email }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Menu items -->
+        <a href="{% url 'home' %}"
+           class="flex items-center gap-3 rounded-lg px-3 py-2 {% if active_menu == 'dashboard' %}bg-orange-600 text-white{% else %}hover:bg-slate-100{% endif %}">
+            <img class="h-4 w-4" src="{% static 'images/overview.svg' %}" alt="Tổng Quan"/>
+            <span>Tổng Quan</span>
+        </a>
+        <a href="{% url 'product_list' %}"
+           class="mt-1 flex items-center gap-3 rounded-lg px-3 py-2 {% if active_menu == 'products' %}bg-orange-600 text-white{% else %}hover:bg-slate-100{% endif %}">
+            <img class="h-4 w-4" src="{% static 'images/product.svg' %}" alt="Sản Phẩm"/>
+            <span>Sản Phẩm</span>
+        </a>
+        <a href="#"
+           class="mt-1 flex items-center gap-3 rounded-lg px-3 py-2 {% if active_menu == 'customers' %}bg-orange-600 text-white{% else %}hover:bg-slate-100{% endif %}">
+            <img class="h-4 w-4" src="{% static 'images/custumer.svg' %}" alt="Khách Hàng"/>
+            <span>Khách Hàng</span>
+        </a>
+        <a href="#"
+           class="mt-1 flex items-center gap-3 rounded-lg px-3 py-2 {% if active_menu == 'analytics' %}bg-orange-600 text-white{% else %}hover:bg-slate-100{% endif %}">
+            <img class="h-4 w-4" src="{% static 'images/analysis.svg' %}" alt="Phân Tích"/>
+            <span>Phân Tích Bán Hàng</span>
+        </a>
+        <a href="#"
+           class="mt-1 flex items-center gap-3 rounded-lg px-3 py-2 {% if active_menu == 'settings' %}bg-orange-600 text-white{% else %}hover:bg-slate-100{% endif %}">
+            <img class="h-4 w-4" src="{% static 'images/setting.svg' %}" alt="Cài Đặt"/>
+            <span>Cài Đặt và Bảo Mật</span>
+        </a>
+        {% if request.user.is_authenticated %}
+            <a href="{% url 'logout' %}" class="mt-1 flex items-center gap-3 rounded-lg px-3 py-2 hover:bg-slate-100">
+                <img class="h-4 w-4" src="{% static 'images/logout.svg' %}" alt="Đăng xuất"/>
+                <span>Đăng xuất</span>
+            </a>
+        {% endif %}
+    </nav>
+</aside>
