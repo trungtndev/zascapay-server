@@ -6,9 +6,6 @@ set -e
 #echo "📦 Installing system packages..."
 #apt update -y
 #apt install -y pkg-config libmysqlclient-dev build-essential gunicorn
-pwd
-
-ls
 # ===============================
 # 2️⃣  Cài Python dependencies
 # ===============================
@@ -24,7 +21,7 @@ fi
 # 3️⃣  Apply migrations
 # ===============================
 echo "🗃️ Applying Django migrations..."
-#cd "$(pwd)/zascapay"
+cd "$(pwd)/zascapay"
 python manage.py makemigrations --noinput
 python manage.py migrate --noinput
 
