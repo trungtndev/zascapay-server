@@ -99,10 +99,36 @@
 
 /* Only header and its nav should use the gradient background */
 .header { background: var(--background); color: var(--color-text); }
-.header nav { /* slightly translucent gradient to mimic /90 */
-  background: linear-gradient(135deg, rgba(255,87,34,0.92) 0%, rgba(98,0,234,0.92) 100%);
+.header nav {
+  /* Use a pseudo-element so the exact header gradient can be rendered beneath nav content
+     This makes the nav blend perfectly with the header gradient for a smooth look */
+  position: relative;
+  background: transparent !important;
   color: var(--color-text);
+  border-bottom-color: transparent !important;
+  transition: box-shadow 280ms ease, backdrop-filter 280ms ease;
 }
+
+.header nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  /* reuse the same gradient token so the colors always match */
+  background: var(--background);
+  background-size: cover;
+  background-repeat: no-repeat;
+  opacity: 0.9;
+  filter: blur(2px);
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* make sure nav inner content sits above the pseudo-element */
+.header nav > .container { position: relative; z-index: 1; }
+
+/* If templates still add bg-gem-dark utilities on the nav, keep them transparent to avoid clashing colors */
+.header .bg-gem-dark { background: transparent !important; }
+.header .bg-gem-dark\/90 { background: transparent !important; }
 
 /* Solid primary button for the rest of the site (non-gradient) */
 .btn-primary { background: var(--color-primary); color: var(--color-text); border: none; padding: .5rem 1rem; border-radius: .75rem; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
