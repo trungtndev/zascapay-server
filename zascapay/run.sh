@@ -4,8 +4,8 @@ set -e
 # 1️⃣  Cài đặt gói hệ thống cần thiết
 # ===============================
 echo "📦 Installing system packages..."
-sudo apt update -y
-sudo apt install -y pkg-config libmysqlclient-dev build-essential gunicorn
+apt update -y
+apt install -y pkg-config libmysqlclient-dev build-essential gunicorn
 
 # ===============================
 # 2️⃣  Cài Python dependencies
