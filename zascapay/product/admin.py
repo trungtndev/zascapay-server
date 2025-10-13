@@ -1,3 +1,2 @@
-from django.contrib import admin
+# This app does not use Django admin.
 
-# Register your models here.

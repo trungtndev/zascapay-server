@@ -15,10 +15,15 @@ class UserSerializer(serializers.Serializer):
     date_joined = serializers.DateTimeField(read_only=True)
     last_login = serializers.DateTimeField(read_only=True, allow_null=True)
 
+    # New optional profile fields
+    phone = serializers.CharField(max_length=20, allow_blank=True, required=False)
+    account_type = serializers.CharField(max_length=20, allow_blank=True, required=False)
+    store_name = serializers.CharField(max_length=255, allow_blank=True, required=False)
+    address = serializers.CharField(allow_blank=True, required=False)
+
     def validate(self, attrs):
         # Prevent admin flags sneaking via serializer context
         incoming = self.context.get('request').data if self.context.get('request') else {}
         if any(flag in incoming for flag in ['is_staff', 'is_superuser']):
             raise serializers.ValidationError('Admin flags are not allowed for this resource.')
         return attrs
-

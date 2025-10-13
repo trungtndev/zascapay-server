@@ -7,3 +7,4 @@ sudo apt install pkg-config libmysqlclient-dev build-essential -y
 cd "$(pwd)/zascapay"
 python manage.py makemigrations
 python manage.py migrate
+python runserver.py

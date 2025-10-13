@@ -2,6 +2,8 @@ from typing import Any, Dict, Optional
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.db import IntegrityError, transaction
+from django.db.models import Q
+import re
 
 User = get_user_model()
 
@@ -62,7 +64,7 @@ class UserService:
         UserService._assert_non_admin_payload(payload)
         user = UserService.get_user(user_id)
         # Only allow a limited set of fields to be updated
-        for field in ['username', 'email', 'first_name', 'last_name', 'is_active']:
+        for field in ['username', 'email', 'first_name', 'last_name', 'is_active', 'phone', 'account_type', 'store_name', 'address']:
             if field in payload and payload[field] is not None:
                 setattr(user, field, payload[field])
         if 'password' in payload and payload['password']:
@@ -77,3 +79,108 @@ class UserService:
         user = UserService.get_user(user_id)
         user.delete()
 
+    # --- Auth ---
+    @staticmethod
+    def authenticate(identifier: str, password: str) -> User:
+        """
+        Authenticate a user by username OR email and return the user if valid.
+        Raises ValidationError on failure.
+        """
+        ident = (identifier or '').strip()
+        if not ident or not password:
+            raise ValidationError('Email/Username and password are required')
+
+        # Try username first, then email
+        try:
+            user = User.objects.get(Q(username__iexact=ident) | Q(email__iexact=ident))
+        except ObjectDoesNotExist:
+            raise ValidationError('Invalid credentials')
+        except Exception:
+            # In case of multiple matches by email or other issues, don't leak info
+            raise ValidationError('Invalid credentials')
+
+        if not user.is_active:
+            raise ValidationError('Tài khoản đã bị vô hiệu hóa')
+        if not user.check_password(password):
+            raise ValidationError('Invalid credentials')
+        return user
+
+    # --- Registration ---
+    @staticmethod
+    def _sanitize_base_username(s: str) -> str:
+        s = s.lower()
+        s = re.sub(r'[^a-z0-9._-]', '', s)
+        s = s.strip('._-')
+        return s or 'user'
+
+    @staticmethod
+    def generate_username_from_email(email: str) -> str:
+        base = (email or '').split('@')[0]
+        base = UserService._sanitize_base_username(base)
+        candidate = base
+        idx = 1
+        while User.objects.filter(username__iexact=candidate).exists():
+            idx += 1
+            candidate = f"{base}{idx}"
+        return candidate
+
+    @staticmethod
+    @transaction.atomic
+    def register(payload: Dict[str, Any]) -> User:
+        """
+        Create a new non-admin user from registration payload.
+        Required: first_name, last_name, email, phone, account_type, store_name, password, password_confirm, terms.
+        Optional: address.
+        """
+        # Basic required checks
+        email = (payload.get('email') or '').strip()
+        password = payload.get('password') or ''
+        password_confirm = payload.get('password_confirm') or ''
+        first_name = (payload.get('first_name') or '').strip()
+        last_name = (payload.get('last_name') or '').strip()
+        phone = (payload.get('phone') or '').strip()
+        account_type = (payload.get('account_type') or '').strip()
+        store_name = (payload.get('store_name') or '').strip()
+        address = (payload.get('address') or '').strip()
+        terms = payload.get('terms')
+
+        if not terms:
+            raise ValidationError('Bạn phải đồng ý với điều khoản.')
+        if not email:
+            raise ValidationError('Email là bắt buộc.')
+        if not first_name or not last_name:
+            raise ValidationError('Họ tên là bắt buộc.')
+        if not phone:
+            raise ValidationError('Số điện thoại là bắt buộc.')
+        if account_type not in ['store', 'enterprise', 'individual']:
+            raise ValidationError('Loại tài khoản không hợp lệ.')
+        if not store_name:
+            raise ValidationError('Tên cửa hàng/công ty là bắt buộc.')
+        if len(password) < 8:
+            raise ValidationError('Mật khẩu phải có ít nhất 8 ký tự.')
+        if password != password_confirm:
+            raise ValidationError('Mật khẩu xác nhận không khớp.')
+
+        # Ensure unique email
+        if User.objects.filter(email__iexact=email).exists():
+            raise ValidationError('Email đã được sử dụng.')
+
+        username = UserService.generate_username_from_email(email)
+
+        user = User(
+            username=username,
+            email=email,
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
+            account_type=account_type,
+            store_name=store_name,
+            address=address,
+            is_staff=False,
+            is_superuser=False,
+        )
+        user.set_password(password)
+        # Let model validation run (respects email uniqueness, choices etc.)
+        user.full_clean(exclude=['password'])
+        user.save()
+        return user

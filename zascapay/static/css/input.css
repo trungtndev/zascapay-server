@@ -11,3 +11,54 @@
   --shadow-card: 0 10px 25px -10px rgba(0, 0, 0, 0.15);
 }
 
+/* Reusable utilities */
+.card-feature { @apply h-full rounded-2xl p-6 shadow-card border border-slate-200/60 flex flex-col transition-transform hover:-translate-y-0.5 bg-gem-light; }
+.badge { @apply mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white; }
+.cta-box { @apply mx-auto max-w-4xl rounded-2xl p-10 md:p-12 border border-slate-200/70 text-center bg-gem-light; }
+
+/*****************/
+/*    Header     */
+/*****************/
+.header {
+  position: relative;
+  overflow: hidden;
+  /* keep padding if not set by utilities */
+}
+
+.header .ocean {
+  height: 2%;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  background: #ffffff;
+}
+
+.header .wave {
+  background: url('../images/wave.svg') repeat-x;
+  position: absolute;
+  top: -190px;
+  width: 6400px;
+  height: 198px;
+  animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) infinite;
+  transform: translate3d(0, 0, 0);
+}
+
+.header .wave:nth-of-type(2) {
+  top: -170px;
+  animation: wave 7s cubic-bezier(0.36, 0.45, 0.63, 0.53) -0.125s infinite,
+             swell 7s ease -1.25s infinite;
+  opacity: 1;
+}
+
+/* Wave Animation */
+@keyframes wave {
+  0% { margin-left: 0; }
+  100% { margin-left: -1600px; }
+}
+
+@keyframes swell {
+  0%, 100% { transform: translate3d(0, -25px, 0); }
+  50% { transform: translate3d(0, 5px, 0); }
+}
+/* end of wave animation */

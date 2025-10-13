@@ -1,0 +1,242 @@
+{% load static %}
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>Đăng ký – Zascapay</title>
+    <link rel="icon" href="{% static 'images/header-gem.svg' %}">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+<body class="min-h-screen antialiased text-slate-700 bg-white">
+<main class="container mx-auto px-4 py-16 md:py-24">
+    <!-- Heading -->
+    <header class="text-center mb-12">
+        <h1 class="text-3xl md:text-3xl font-extrabold text-slate-800 leading-tight">
+            Đăng Ký Tài Khoản
+        </h1>
+        <p class="mt-2 text-slate-600">Tạo tài khoản mới cho Hệ Thống Thanh Toán Thông Minh</p>
+    </header>
+
+    <!-- Registration Form Card -->
+    <section class="mx-auto max-w-3xl border border-slate-200 rounded-2xl shadow-md bg-white">
+        <!-- Tabs -->
+        <div class="mx-6 md:mx-8 mt-6 md:mt-8 mb-2 bg-[#d9d9d9] rounded-xl px-2 py-2">
+            <div class="grid grid-cols-2 items-center gap-2">
+                <a href="{% url 'login' %}" class="block w-full text-center text-slate-700 font-medium select-none">Đăng Nhập</a>
+                <a href="{% url 'register' %}" class="block w-full text-center select-none rounded-xl bg-orange-600 text-white font-semibold px-6 md:px-7 py-2.5 shadow ring-1 ring-black/10">Đăng Ký</a>
+            </div>
+        </div>
+
+        <!-- Form -->
+        <div class="p-6 md:p-8">{% if error %}
+            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 text-red-700 px-4 py-3">
+                {{ error }}
+            </div>
+            {% endif %}
+            <form method="post" action="{% url 'register' %}" class="grid gap-6">
+                {% csrf_token %}
+
+                <!-- First Name & Last Name Row -->
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="grid gap-2">
+                        <label for="first_name" class="text-sm font-medium">Họ và Tên Đệm <span class="text-orange-600">*</span></label>
+                        <input id="first_name" name="first_name" type="text" required placeholder="Nguyễn Văn"
+                               value="{{ values.first_name|default:'' }}"
+                               class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gem-mid"/>
+                    </div>
+                    <div class="grid gap-2">
+                        <label for="last_name" class="text-sm font-medium">Tên <span class="text-orange-600">*</span></label>
+                        <input id="last_name" name="last_name" type="text" required placeholder="An"
+                               value="{{ values.last_name|default:'' }}"
+                               class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gem-mid"/>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <div class="grid gap-2">
+                    <label for="email" class="text-sm font-medium">Email <span class="text-orange-600">*</span></label>
+                    <input id="email" name="email" type="email" required placeholder="email@example.com"
+                           value="{{ values.email|default:'' }}"
+                           class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gem-mid"/>
+                </div>
+
+                <!-- Phone Number -->
+                <div class="grid gap-2">
+                    <label for="phone" class="text-sm font-medium">Số Điện Thoại <span class="text-orange-600">*</span></label>
+                    <input id="phone" name="phone" type="tel" required placeholder="0987654321"
+                           value="{{ values.phone|default:'' }}"
+                           class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gem-mid"/>
+                </div>
+
+                <!-- Account Type Dropdown -->
+                <div class="grid gap-2">
+                    <label for="account_type" class="text-sm font-medium">Loại Tài Khoản <span class="text-orange-600">*</span></label>
+                    <select id="account_type" name="account_type" required
+                            class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gem-mid">
+                        <option value="">Chọn loại tài khoản</option>
+                        <option value="store" {% if values.account_type == 'store' %}selected{% endif %}>Cửa hàng</option>
+                        <option value="enterprise" {% if values.account_type == 'enterprise' %}selected{% endif %}>Doanh nghiệp</option>
+                        <option value="individual" {% if values.account_type == 'individual' %}selected{% endif %}>Cá nhân</option>
+                    </select>
+                </div>
+
+                <!-- Store/Company Name -->
+                <div class="grid gap-2">
+                    <label for="store_name" class="text-sm font-medium">Tên Cửa Hàng/Công Ty <span class="text-orange-600">*</span></label>
+                    <input id="store_name" name="store_name" type="text" required placeholder="Cửa hàng tiện lợi ABC"
+                           value="{{ values.store_name|default:'' }}"
+                           class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gem-mid"/>
+                </div>
+
+                <!-- Address (Textarea) -->
+                <div class="grid gap-2">
+                    <label for="address" class="text-sm font-medium">Địa Chỉ Cửa Hàng</label>
+                    <textarea id="address" name="address" rows="3" placeholder="123 Đường ABC, Quận XYZ, TP. Hồ Chí Minh"
+                              class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gem-mid">{{ values.address|default:'' }}</textarea>
+                </div>
+
+                <!-- Password & Confirm Password Row -->
+                <div class="grid sm:grid-cols-2 gap-4">
+                    <div class="grid gap-2">
+                        <label for="password" class="text-sm font-medium">Mật Khẩu <span class="text-orange-600">*</span></label>
+                        <input id="password" name="password" type="password" required placeholder="••••••••"
+                               class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gem-mid"/>
+                    </div>
+                    <div class="grid gap-2">
+                        <label for="password_confirm" class="text-sm font-medium">Xác Nhận Mật Khẩu <span class="text-orange-600">*</span></label>
+                        <input id="password_confirm" name="password_confirm" type="password" required placeholder="••••••••"
+                               class="w-full rounded-lg border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-gem-mid"/>
+                    </div>
+                </div>
+
+                <!-- Password Requirements Alert -->
+                <div class="flex items-start gap-3 bg-orange-600/10 border border-orange-600/20 rounded-lg p-4">
+                    <svg class="w-5 h-5 text-orange-600 mt-0.5" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"></path>
+                    </svg>
+                    <div>
+                        <p class="font-semibold text-slate-800 mb-2">Yêu cầu mật khẩu:</p>
+                        <ul class="text-sm text-slate-600 space-y-1">
+                            <li>• Tối thiểu 8 ký tự</li>
+                            <li>• Chứa ít nhất 1 chữ hoa và 1 chữ thường</li>
+                            <li>• Chứa ít nhất 1 số và 1 ký tự đặc biệt</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Terms & Privacy Policy Section -->
+                <div class="grid gap-3">
+                    <p class="font-medium text-slate-800">Điều khoản sử dụng • Chính sách bảo mật</p>
+                    <label class="inline-flex items-start gap-3 text-sm">
+                        <input type="checkbox" name="terms" required
+                               class="w-4 h-4 mt-0.5 border border-neutral-300 rounded shadow-inner"/>
+                        <span class="text-slate-700">Tôi đồng ý với điều khoản và chính sách của hệ thống</span>
+                    </label>
+                    <label class="inline-flex items-start gap-3 text-sm">
+                        <input type="checkbox" name="newsletter"
+                               class="w-4 h-4 mt-0.5 border border-neutral-300 rounded shadow-inner"/>
+                        <span class="text-slate-700">Tôi muốn nhận thông báo về cập nhật sản phẩm và tính năng mới qua email</span>
+                    </label>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit"
+                        class="inline-flex items-center justify-center gap-3 w-full rounded-full bg-[#2415cc] hover:bg-[#1d12ab] text-white font-semibold px-6 py-3 transition">
+                    <svg class="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+                        <path fill="currentColor" d="M12 4a4 4 0 0 1 4 4 4 4 0 0 1-4 4 4 4 0 0 1-4-4 4 4 0 0 1 4-4m0 10c4.42 0 8 1.79 8 4v2H4v-2c0-2.21 3.58-4 8-4z"></path>
+                    </svg>
+                    Tạo Tài Khoản
+                </button>
+
+                <!-- Already have account link -->
+                <p class="text-center text-sm text-slate-600">
+                    Đã có tài khoản?
+                    <a href="/login" class="text-orange-600 font-semibold hover:underline">Đăng nhập ngay</a>
+                    <a href="{% url 'login' %}" class="text-orange-600 font-semibold hover:underline">Đăng nhập ngay</a>
+            </form>
+        </div>
+    </section>
+
+    <!-- Benefits Section -->
+    <section class="mx-auto max-w-3xl mt-8 border border-slate-200 rounded-2xl p-6 bg-[#eef2ff]">
+        <h3 class="text-xl font-bold text-slate-800 mb-4 text-center">Lợi Ích Khi Đăng Ký</h3>
+        <div class="grid sm:grid-cols-2 gap-6">
+            <!-- Benefit 1 -->
+            <div class="flex items-start gap-4">
+                <span class="w-10 h-10 rounded-xl bg-orange-600 inline-flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 2 2 7v10l10 5 10-5V7z"></path>
+                    </svg>
+                </span>
+                <div>
+                    <p class="font-semibold">AI Nhận Diện Thông Minh</p>
+                    <p class="text-sm text-slate-600 mt-1">Tự động nhận diện sản phẩm với độ chính xác cao</p>
+                </div>
+            </div>
+            <!-- Benefit 2 -->
+            <div class="flex items-start gap-4">
+                <span class="w-10 h-10 rounded-xl bg-orange-600 inline-flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M3 13h8V3H3zm10 8h8V3h-8zM3 21h8v-6H3z"></path>
+                    </svg>
+                </span>
+                <div>
+                    <p class="font-semibold">Báo Cáo Chi Tiết</p>
+                    <p class="text-sm text-slate-600 mt-1">Thống kê doanh thu và hiệu suất realtime</p>
+                </div>
+            </div>
+            <!-- Benefit 3 -->
+            <div class="flex items-start gap-4">
+                <span class="w-10 h-10 rounded-xl bg-orange-600 inline-flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm.5-13H11v6l5.2 3.2.8-1.3-4.5-2.7V7z"></path>
+                    </svg>
+                </span>
+                <div>
+                    <p class="font-semibold">Cập Nhật Tự Động</p>
+                    <p class="text-sm text-slate-600 mt-1">Model AI được cải thiện liên tục</p>
+                </div>
+            </div>
+            <!-- Benefit 4 -->
+            <div class="flex items-start gap-4">
+                <span class="w-10 h-10 rounded-xl bg-orange-600 inline-flex items-center justify-center">
+                    <svg class="w-5 h-5 text-white" viewBox="0 0 24 24">
+                        <path fill="currentColor" d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"></path>
+                    </svg>
+                </span>
+                <div>
+                    <p class="font-semibold">Hỗ Trợ 24/7</p>
+                    <p class="text-sm text-slate-600 mt-1">Đội ngũ kỹ thuật sẵn sàng hỗ trợ</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support Footer -->
+    <section class="mx-auto max-w-3xl mt-8 text-center">
+        <p class="text-slate-600 mb-3">Cần hỗ trợ đăng ký?</p>
+        <div class="flex flex-col sm:flex-row items-center justify-center gap-6 text-sm">
+            <span class="inline-flex items-center gap-2 text-slate-700">
+                <svg class="w-4 h-4 text-orange-600" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M6.6 10.8c1.6 3 3.6 5 6.6 6.6l2.2-2.2c.3-.3.8-.4 1.1-.2 1 .4 2 .6 3.1.6.6 0 1 .4 1 .9V20c0 .6-.4 1-1 1C10.7 21 3 13.3 3 3.9c0-.6.4-.9 1-.9h3.5c.6 0 1 .4 1 .9 0 1.1.2 2.1.6 3.1.1.4 0 .8-.3 1.1z"></path>
+                </svg>
+                Hotline: 1900-1234
+            </span>
+            <span class="inline-flex items-center gap-2 text-slate-700">
+                <svg class="w-4 h-4 text-orange-600" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12 13 2 6.5V18h20V6.5zM12 11 2 4h20z"></path>
+                </svg>
+                support@smartcheckout.vn
+            </span>
+            <span class="inline-flex items-center gap-2 text-slate-700">
+                <svg class="w-4 h-4 text-orange-600" viewBox="0 0 24 24">
+                    <path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v6h-2zm0 8h2v2h-2z"></path>
+                </svg>
+                Live Chat
+            </span>
+        </div>
+    </section>
+</main>
+</body>
+</html>

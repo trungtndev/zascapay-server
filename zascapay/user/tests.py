@@ -38,9 +38,9 @@ class UserApiTests(TestCase):
         self.assertEqual(res.status_code, status.HTTP_400_BAD_REQUEST)
 
     def test_list_only_non_admin_users(self):
-        u1 = User.objects.create_user(username='u1', password='p1')
-        u2 = User.objects.create_user(username='u2', password='p2')
-        admin = User.objects.create_superuser(username='admin', password='adminpass')
+        u1 = User.objects.create_user(username='u1', email='u1@example.com', password='p1')
+        u2 = User.objects.create_user(username='u2', email='u2@example.com', password='p2')
+        admin = User.objects.create_superuser(username='admin', email='admin@example.com', password='adminpass')
         res = self.client.get(self.list_url)
         self.assertEqual(res.status_code, status.HTTP_200_OK)
         usernames = [u['username'] for u in res.data]
@@ -72,3 +72,129 @@ class UserApiTests(TestCase):
         # Ensure gone
         res = self.client.get(detail_url)
         self.assertEqual(res.status_code, status.HTTP_404_NOT_FOUND)
+
+
+class LoginViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username='tester', email='tester@example.com', password='secret123'
+        )
+        self.login_url = reverse('login')
+        self.logout_url = reverse('logout')
+
+    def test_login_with_username_success(self):
+        res = self.client.post(self.login_url, {'email': 'tester', 'password': 'secret123'})
+        # Expect redirect to home
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.url, '/')
+        # Session created
+        self.assertIn('_auth_user_id', self.client.session)
+        # Default behavior (no remember): expire at browser close
+        self.assertTrue(self.client.session.get_expire_at_browser_close())
+
+    def test_login_with_email_success(self):
+        res = self.client.post(self.login_url, {'email': 'tester@example.com', 'password': 'secret123', 'remember': 'on'})
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.url, '/')
+        self.assertIn('_auth_user_id', self.client.session)
+        # With remember, should be persistent
+        self.assertFalse(self.client.session.get_expire_at_browser_close())
+
+    def test_login_invalid_credentials(self):
+        res = self.client.post(self.login_url, {'email': 'tester', 'password': 'wrong'})
+        self.assertEqual(res.status_code, 400)
+        # Error message rendered with 400 status
+        self.assertContains(res, 'Invalid credentials', status_code=400)
+
+    def test_logout_redirects_to_login(self):
+        # First login
+        self.client.post(self.login_url, {'email': 'tester', 'password': 'secret123'})
+        self.assertIn('_auth_user_id', self.client.session)
+        # Logout
+        res = self.client.post(self.logout_url)
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.url, self.login_url)
+        # Session cleared
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+
+class RegisterViewTests(TestCase):
+    def setUp(self):
+        self.register_url = reverse('register')
+
+    def test_register_success(self):
+        payload = {
+            'first_name': 'Lan',
+            'last_name': 'Anh',
+            'email': 'lan.anh@example.com',
+            'phone': '0900000000',
+            'account_type': 'store',
+            'store_name': 'Cua Hang ABC',
+            'address': '123 ABC, HCM',
+            'password': 'StrongPass1!',
+            'password_confirm': 'StrongPass1!',
+            'terms': 'on',
+        }
+        res = self.client.post(self.register_url, payload)
+        self.assertEqual(res.status_code, 302)
+        self.assertEqual(res.url, '/')
+        # User is created and logged in
+        self.assertIn('_auth_user_id', self.client.session)
+        user = User.objects.get(email='lan.anh@example.com')
+        self.assertEqual(user.first_name, 'Lan')
+        self.assertEqual(user.last_name, 'Anh')
+        self.assertEqual(user.phone, '0900000000')
+        self.assertEqual(user.account_type, 'store')
+        self.assertEqual(user.store_name, 'Cua Hang ABC')
+        self.assertTrue(user.check_password('StrongPass1!'))
+        self.assertFalse(user.is_staff)
+        self.assertFalse(user.is_superuser)
+
+    def test_register_password_mismatch(self):
+        payload = {
+            'first_name': 'Lan',
+            'last_name': 'Anh',
+            'email': 'lan2@example.com',
+            'phone': '0900000001',
+            'account_type': 'enterprise',
+            'store_name': 'Cong ty XYZ',
+            'password': 'StrongPass1!',
+            'password_confirm': 'WrongConfirm',
+            'terms': 'on',
+        }
+        res = self.client.post(self.register_url, payload)
+        self.assertEqual(res.status_code, 400)
+        self.assertContains(res, 'khớp', status_code=400)
+
+    def test_register_duplicate_email(self):
+        User.objects.create_user(username='u1', email='dup@example.com', password='secret123')
+        payload = {
+            'first_name': 'A',
+            'last_name': 'B',
+            'email': 'dup@example.com',
+            'phone': '0900000002',
+            'account_type': 'individual',
+            'store_name': 'Self',
+            'password': 'StrongPass1!',
+            'password_confirm': 'StrongPass1!',
+            'terms': 'on',
+        }
+        res = self.client.post(self.register_url, payload)
+        self.assertEqual(res.status_code, 400)
+        self.assertContains(res, 'Email đã được sử dụng', status_code=400)
+
+    def test_register_requires_terms(self):
+        payload = {
+            'first_name': 'A',
+            'last_name': 'B',
+            'email': 'no-terms@example.com',
+            'phone': '0900000003',
+            'account_type': 'store',
+            'store_name': 'Shop',
+            'password': 'StrongPass1!',
+            'password_confirm': 'StrongPass1!',
+            # missing terms
+        }
+        res = self.client.post(self.register_url, payload)
+        self.assertEqual(res.status_code, 400)
+        self.assertContains(res, 'đồng ý với điều khoản', status_code=400)
