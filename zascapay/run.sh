@@ -6,7 +6,9 @@ set -e
 #echo "📦 Installing system packages..."
 #apt update -y
 #apt install -y pkg-config libmysqlclient-dev build-essential gunicorn
+pwd
 
+ls
 # ===============================
 # 2️⃣  Cài Python dependencies
 # ===============================
