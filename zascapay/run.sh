@@ -24,7 +24,7 @@ fi
 # 3️⃣  Apply migrations
 # ===============================
 echo "🗃️ Applying Django migrations..."
-cd "$(pwd)/zascapay"
+#cd "$(pwd)/zascapay"
 python manage.py makemigrations --noinput
 python manage.py migrate --noinput
 
