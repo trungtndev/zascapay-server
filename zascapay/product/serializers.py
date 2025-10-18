@@ -54,3 +54,24 @@ class ProductSerializer(serializers.ModelSerializer):
         if value < 0 or value > 100:
             raise serializers.ValidationError('accuracy_rate phải nằm trong khoảng 0..100 (phần trăm).')
         return value
+
+
+# ------------------------------------------------------------------
+# Detection serializer used by the scan API
+# ------------------------------------------------------------------
+from .models import Detection
+
+
+class DetectionSerializer(serializers.ModelSerializer):
+    product_name = serializers.CharField(source='product.name', read_only=True)
+
+    class Meta:
+        model = Detection
+        fields = [
+            'id',
+            'name',
+            'accuracy',
+            'product',
+            'product_name',
+        ]
+        read_only_fields = ['id', 'product_name']

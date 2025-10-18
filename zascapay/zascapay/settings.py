@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-4*wgx-mp!dgol!e5*5v_24h#3qm#n(0mbq=7)ryb7t7xez5=@&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["*"]
+ALLOWED_HOSTS = ['zascapay-server.onrender.com', 'localhost', '127.0.0.1']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://zascapay-server.onrender.com',
+]
 
 
 # Application definition
@@ -41,7 +45,8 @@ INSTALLED_APPS = [
     'rest_framework',
     # Local apps
     'user',
-    'product'
+    'product',
+    'payment',
 ]
 
 MIDDLEWARE = [

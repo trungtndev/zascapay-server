@@ -30,6 +30,8 @@ ls
 python manage.py collectstatic --noinput
 python manage.py makemigrations --noinput
 python manage.py migrate --noinput
+python manage.py add --file ../yolo_names.json
 
+#python manage.py add_products_from_yolo --file ../yolo_names.json --random-price
 #echo "🔥 Starting  server..."
-#python runserver.py
+#python manage.py runserver 0.0.0.0:8888

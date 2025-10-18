@@ -24,14 +24,17 @@
   --color-warning: #F44336;
   --color-text: #FFFFFF;
   --background: linear-gradient(135deg, #FF5722 0%, #6200EA 100%);
+  /* navigation height used for fixed nav pinning */
+  --nav-height: 64px;
   --shadow-card: 0 10px 25px -10px rgba(0, 0, 0, 0.15);
 }
 
 /* Reusable utilities */
-.card-feature { @apply h-full rounded-2xl p-6 shadow-card border border-slate-200/60 flex flex-col transition-transform hover:-translate-y-0.5; background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.9)); }
-.card-feature--accent { @apply h-full rounded-2xl p-6 shadow-card border border-slate-200/60 flex flex-col transition-transform hover:-translate-y-0.5; background: var(--background); color: var(--color-text); }
-.badge { @apply mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white; }
-.cta-box { @apply mx-auto max-w-4xl rounded-2xl p-10 md:p-12 border border-slate-200/70 text-center; background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(255,255,255,0.92)); }
+.card-feature { @apply h-full rounded-2xl p-6 shadow-card border border-slate-200/60 flex flex-col transition-transform hover:-translate-y-0.5; background: var(--color-text); }
+.card-feature--accent { @apply h-full rounded-2xl p-6 shadow-card border border-slate-200/60 flex flex-col transition-transform hover:-translate-y-0.5; background: var(--color-primary); color: var(--color-text); }
+.badge { @apply mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700; }
+.card-feature--accent .badge { background: var(--color-text); color: inherit; }
+.cta-box { @apply mx-auto max-w-4xl rounded-2xl p-10 md:p-12 border border-slate-200/70 text-center; background: var(--color-text); color: inherit; }
 
 /* Gradient helpers */
 .logo-gradient { background: var(--background); -webkit-background-clip: text; background-clip: text; color: transparent; }
@@ -99,37 +102,74 @@
 
 /* Only header and its nav should use the gradient background */
 .header { background: var(--background); color: var(--color-text); }
+
+/* Keep nav visually transparent so it uses the header gradient behind it; add a soft backdrop blur
+   for legibility of nav items. Nav stays on top via z-index. */
 .header nav {
-  /* Use a pseudo-element so the exact header gradient can be rendered beneath nav content
-     This makes the nav blend perfectly with the header gradient for a smooth look */
-  position: relative;
+  /* pin nav to viewport */
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--nav-height);
   background: transparent !important;
   color: var(--color-text);
   border-bottom-color: transparent !important;
-  transition: box-shadow 280ms ease, backdrop-filter 280ms ease;
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+  z-index: 9999; /* ensure nav stays on top */
 }
 
-.header nav::before {
+/* Fade the bottom of the header into white to make the transition to the page content smooth */
+.header::after {
   content: "";
   position: absolute;
-  inset: 0;
-  /* reuse the same gradient token so the colors always match */
-  background: var(--background);
-  background-size: cover;
-  background-repeat: no-repeat;
-  opacity: 0.9;
-  filter: blur(2px);
-  z-index: 0;
+  left: 0;
+  right: 0;
+  bottom: -1px; /* slightly overlap the next section */
+  height: 160px;
   pointer-events: none;
+  z-index: 40; /* sits above header background but under the nav */
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 85%);
 }
 
-/* make sure nav inner content sits above the pseudo-element */
-.header nav > .container { position: relative; z-index: 1; }
+/* Make sure header content is not hidden under the fixed nav */
+.header { padding-top: var(--nav-height); }
+
+/* Ensure nav content (the .container) is vertically centered inside the fixed nav */
+.header nav > .container { height: 100%; display: flex; align-items: center; }
+
+/* Responsive: smaller nav on small screens */
+@media (max-width: 640px) {
+  :root { --nav-height: 56px; }
+}
 
 /* If templates still add bg-gem-dark utilities on the nav, keep them transparent to avoid clashing colors */
 .header .bg-gem-dark { background: transparent !important; }
 .header .bg-gem-dark\/90 { background: transparent !important; }
 
+/* Mobile fallback: reduce blur and height of fade for small screens */
+@media (max-width: 640px) {
+  .header::after { height: 96px; background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,1) 90%); }
+  .header nav { -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px); }
+}
+
 /* Solid primary button for the rest of the site (non-gradient) */
 .btn-primary { background: var(--color-primary); color: var(--color-text); border: none; padding: .5rem 1rem; border-radius: .75rem; box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
 .btn-primary:active { transform: translateY(1px); }
+
+/* Nav scrolled state: when user scrolls, make the nav slightly more opaque and add shadow for depth */
+.header nav {
+  transition: background 260ms ease, box-shadow 260ms ease, backdrop-filter 260ms ease;
+}
+.header nav.nav-scrolled {
+  /* overlay matching the gradient but slightly dimmer to ensure contrast */
+  background: linear-gradient(135deg, rgba(255,87,34,0.92) 0%, rgba(98,0,234,0.92) 100%) !important;
+  box-shadow: 0 8px 30px rgba(6,6,7,0.12);
+  -webkit-backdrop-filter: blur(4px);
+  backdrop-filter: blur(4px);
+}
+
+@media (max-width: 640px) {
+  .header nav.nav-scrolled { background: linear-gradient(135deg, rgba(255,87,34,0.95) 0%, rgba(98,0,234,0.95) 100%) !important; }
+}

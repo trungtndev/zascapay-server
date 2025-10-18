@@ -1,6 +1,6 @@
 from django.urls import path
 
-from .views import ProductPageView, ProductViewSet, ProductCategoryViewSet
+from .views import ProductPageView, ProductViewSet, ProductCategoryViewSet, ScanAPIView
 
 urlpatterns = [
     # HTML page (Hybrid View-API): /product/
@@ -10,6 +10,7 @@ urlpatterns = [
     path('api/products/', ProductViewSet.as_view({'get': 'list', 'post': 'create'}), name='product-list'),
     path('api/products/metrics/', ProductViewSet.as_view({'get': 'metrics'}), name='product-metrics'),
     path('api/products/export/', ProductViewSet.as_view({'get': 'export'}), name='product-export'),
+    path('api/products/scan/', ScanAPIView.as_view(), name='product-scan'),
     path('api/products/<int:pk>/', ProductViewSet.as_view({
         'get': 'retrieve',
         'patch': 'partial_update',

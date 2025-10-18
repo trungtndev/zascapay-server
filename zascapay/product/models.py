@@ -58,3 +58,36 @@ class Product(models.Model):
 
     def __str__(self) -> str:  # pragma: no cover
         return f"{self.name} ({self.sku})"
+
+
+class Detection(models.Model):
+    """Class detection được phát hiện bởi YOLO, liên kết tới `Product`."""
+    # explicit 32-bit integer primary key as requested
+    id = models.AutoField(primary_key=True)
+    name = models.CharField(max_length=200)
+    accuracy = models.DecimalField(
+        max_digits=5,
+        decimal_places=2,
+        default=0,
+        null=True,
+        help_text='Accuracy percent, e.g. 94.25'
+    )
+    product = models.ForeignKey(
+        Product,
+        on_delete=models.CASCADE,
+        related_name='detections',
+        db_column='product_id',
+    )
+
+    class Meta:
+        db_table = 'detection'
+        indexes = [
+            models.Index(fields=['name'], name='idx_det_name'),
+            models.Index(fields=['product'], name='idx_det_product'),
+        ]
+        verbose_name = 'Detection'
+        verbose_name_plural = 'Detections'
+
+    def __str__(self) -> str:  # pragma: no cover
+        acc_display = f"{self.accuracy}%" if self.accuracy is not None else "n/a"
+        return f"{self.name} ({acc_display})"

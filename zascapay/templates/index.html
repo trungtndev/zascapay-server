@@ -14,8 +14,8 @@
     <nav class="fixed top-0 left-0 right-0 z-50 bg-gem-dark/90 backdrop-blur border-b border-white/10">
         <div class="container mx-auto px-4 py-3 flex items-center justify-between">
             <a href="#" class="flex items-center gap-2 font-semibold">
-                <img class="h-7 w-7" src="{% static 'images/logo.svg' %}" alt="Zascapay"/>
-                <span class="logo-gradient">Zascapay</span>
+{#                <img class="h-7 w-7" src="{% static 'images/logo.svg' %}" alt="Zascapay"/>#}
+                <span class="text-white text-2xl md:text-3xl lg:text-4xl font-extrabold tracking-tight">Zascapay</span>
             </a>
             <div class="hidden md:flex items-center gap-8 text-sm">
                 <a href="#details" class="hover:text-gem-light/80">Tổng quan</a>
@@ -50,7 +50,7 @@
             </div>
             <div class="relative">
                 <img src="{% static 'images/logo.svg' %}" alt="AI Checkout Illustration"
-                     class="mx-auto w-1/2 md:w-1/3 drop-shadow-2xl"/>
+                     class="mx-auto w-1/3 md:w-1/4 drop-shadow-2xl"/>
             </div>
         </div>
     </div>
@@ -195,5 +195,27 @@
         © 2025 Zascapay – AI Smart Checkout System. All rights reserved.
     </div>
 </footer>
+
+<!-- Add scroll script to toggle nav-scrolled class on the fixed nav -->
+<script>
+(function () {
+  var nav = document.querySelector('header nav');
+  if (!nav) return;
+  var ticking = false;
+  function update() {
+    var y = window.scrollY || window.pageYOffset;
+    if (y > 20) nav.classList.add('nav-scrolled');
+    else nav.classList.remove('nav-scrolled');
+  }
+  // initialize state
+  update();
+  window.addEventListener('scroll', function () {
+    if (!ticking) {
+      window.requestAnimationFrame(function () { update(); ticking = false; });
+      ticking = true;
+    }
+  }, { passive: true });
+})();
+</script>
 </body>
 </html>

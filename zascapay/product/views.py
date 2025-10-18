@@ -1,3 +1,4 @@
+from PIL import Image
 from django.db.models.deletion import ProtectedError
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import HttpResponse
@@ -9,7 +10,9 @@ from rest_framework.decorators import action
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.request import Request
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.views import APIView
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from typing import cast
 from django.conf import settings
 from django.core.files.base import ContentFile
@@ -17,8 +20,9 @@ from django.core.files.storage import default_storage
 import os
 import uuid
 import logging
+from django.utils import timezone
 
-from .models import ProductCategory
+from .models import ProductCategory, Product, Detection
 from .serializers import ProductSerializer, ProductCategorySerializer
 from .services import (
     compute_product_metrics,
@@ -29,8 +33,20 @@ from .services import (
     soft_delete_product,
     restore_product,
 )
-
+from ultralytics import YOLO
+import torch
+import base64
+import io
+try:
+    import cv2
+    _HAS_CV2 = True
+except Exception:
+    _HAS_CV2 = False
 logger = logging.getLogger(__name__)
+
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+print("Device", device)
+
 
 # Create your views here.
 
@@ -49,6 +65,9 @@ class ProductViewSet(viewsets.ModelViewSet):
     serializer_class = ProductSerializer
     pagination_class = StandardResultsSetPagination
     permission_classes = [IsAuthenticated]
+
+    # Lazy-loaded class-level model reference to avoid reloading per request
+    yolo_model = YOLO("yolo12n.pt", verbose=False).to(device)
 
     def get_queryset(self):
         request = cast(Request, cast(object, self.request))
@@ -164,6 +183,78 @@ class ProductViewSet(viewsets.ModelViewSet):
         resp = HttpResponse(content, content_type='text/csv; charset=utf-8')
         resp['Content-Disposition'] = 'attachment; filename="products_export.csv"'
         return resp
+
+class ScanAPIView(APIView):
+    """Public API endpoint for scanning an image.
+
+    Accepts JSON {"image": "data:image/...;base64,..."} or multipart/form-data with file field 'image' or 'file'.
+    This read-only variant does NOT write to the database; it only returns the detected classes and the annotated image.
+    """
+    permission_classes = [AllowAny]
+    authentication_classes = []  # disable session authentication & CSRF for this endpoint
+    parser_classes = [JSONParser, MultiPartParser, FormParser]
+    yolo_model = YOLO("yolo12n.pt", verbose=False).to(device)
+
+    def post(self, request, format=None):
+        # support base64 field or uploaded file
+        image_b64 = request.data.get('image')
+        image_file = None
+        if not image_b64:
+            image_file = request.FILES.get('image') or request.FILES.get('file') if hasattr(request, 'FILES') else None
+
+        if image_file:
+            try:
+                image_bytes = image_file.read()
+            except Exception:
+                return Response({'detail': 'Không thể đọc file ảnh.'}, status=status.HTTP_400_BAD_REQUEST)
+        elif image_b64:
+            try:
+                image_bytes = base64.b64decode(image_b64.split(',')[-1])
+            except Exception:
+                return Response({'detail': 'Base64 không hợp lệ.'}, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response({'detail': 'Thiếu ảnh (base64 hoặc file).'}, status=status.HTTP_400_BAD_REQUEST)
+
+        try:
+            image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+
+            results = self.yolo_model(image)
+            result = results[0]
+
+            labels = result.names
+            boxes = result.boxes
+
+            detections_data = []
+            annotated = result.plot(conf=False, probs=False)
+
+            # Only read product info for mapping; do NOT modify DB or create Detection rows
+            for cls_id, conf in zip(boxes.cls.tolist(), boxes.conf.tolist()):
+                cls_name = labels[int(cls_id)]
+                accuracy = round(float(conf) * 100, 2)
+
+                # map to product if exists (read-only)
+                product = Product.objects.filter(name__iexact=cls_name).first()
+
+                detections_data.append({
+                    'product_id': product.id,
+                    'product_name': product.name,
+                    'price': str(product.price) if product else None,
+                })
+
+            buf = io.BytesIO()
+            img = Image.fromarray(cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB))
+            img.save(buf, format='JPEG')  # ghi ảnh vào buffer
+            buf.seek(0)  # quay về đầu buffer
+            annotated_b64 = base64.b64encode(buf.getvalue()).decode()
+
+            return Response({
+                'products': detections_data,
+                'image': annotated_b64,
+            })
+
+        except Exception as e:
+            logger.exception('Error in ScanAPIView')
+            return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
 class ProductCategoryViewSet(viewsets.ModelViewSet):
