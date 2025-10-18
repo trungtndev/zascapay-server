@@ -97,66 +97,99 @@
 <!-- Feature Cards -->
 <section id="features" class="bg-white py-16 md:py-24">
     <div class="container mx-auto px-4">
+        <!-- Replaced the old simple cards with improved, accessible card components -->
         <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="card-feature">
-                <div class="badge">
-                    <svg class="h-5 w-5 text-gem-dark" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2 3 6.5v11L12 22l9-4.5v-11L12 2Z"/>
-                    </svg>
-                </div>
-                <h4 class="font-semibold text-lg text-gem-dark">AI Vision Engine</h4>
-                <p class="mt-2 text-slate-600">Nhận diện chính xác sản phẩm với độ chính xác >99% trong mọi điều kiện ánh sáng.</p>
-            </div>
 
-            <div class="card-feature">
-                <div class="badge">
-                    <svg class="h-5 w-5 text-gem-dark" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2 1.5 7.5 12 13 22.5 7.5 12 2Z"/>
-                    </svg>
+            <article class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-transform duration-200 ease-out transform hover:-translate-y-1" aria-labelledby="card-title-ai-vision">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 bg-gem-light/10 text-gem-dark rounded-full p-3">
+                        <span class="text-2xl" aria-hidden="true">👁️</span>
+                    </div>
+                    <div>
+                        <h4 id="card-title-ai-vision" class="font-semibold text-lg text-gem-dark">AI Vision Engine</h4>
+                        <p class="mt-2 text-slate-600">Nhận diện sản phẩm nhanh và chính xác trong mọi điều kiện ánh sáng.</p>
+                        <div class="mt-4">
+                            <a href="#" class="text-gem-mid font-semibold hover:underline" aria-label="Tìm hiểu về AI Vision Engine">Tìm hiểu</a>
+                        </div>
+                    </div>
                 </div>
-                <h4 class="font-semibold text-lg text-gem-dark">Thanh toán không chạm</h4>
-                <p class="mt-2 text-slate-600">Tự động trừ tiền khi rời quầy – không cần chạm, không cần quét mã.</p>
-            </div>
+            </article>
 
-            <div class="card-feature">
-                <div class="badge">
-                    <svg class="h-5 w-5 text-gem-dark" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M11 3h2v8l2.5-2.5L17 10l-5 5-5-5 1.5-1.5L11 11V3Z"/>
-                    </svg>
+            <article class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-transform duration-200 ease-out transform hover:-translate-y-1" aria-labelledby="card-title-touchless">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 bg-gem-light/10 text-gem-dark rounded-full p-3">
+                        <span class="text-2xl" aria-hidden="true">💳</span>
+                    </div>
+                    <div>
+                        <h4 id="card-title-touchless" class="font-semibold text-lg text-gem-dark">Thanh toán không chạm</h4>
+                        <p class="mt-2 text-slate-600">Tự động trừ tiền khi rời quầy — nhanh, tiện và an toàn.</p>
+                        <div class="mt-4">
+                            <a href="#" class="text-gem-mid font-semibold hover:underline" aria-label="Xem cơ chế thanh toán không chạm">Xem cơ chế</a>
+                        </div>
+                    </div>
                 </div>
-                <h4 class="font-semibold text-lg text-gem-dark">Dễ dàng tích hợp</h4>
-                <p class="mt-2 text-slate-600">Kết nối API với hệ thống POS hoặc ứng dụng bán hàng hiện có của doanh nghiệp.</p>
-            </div>
+            </article>
 
-            <div class="card-feature">
-                <div class="badge">
-                    <svg class="h-5 w-5 text-gem-dark" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 8a4 4 0 1 1 0 8Z"/>
-                    </svg>
+            <article class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-transform duration-200 ease-out transform hover:-translate-y-1" aria-labelledby="card-title-integration">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 bg-gem-light/10 text-gem-dark rounded-full p-3">
+                        <span class="text-2xl" aria-hidden="true">🔌</span>
+                    </div>
+                    <div>
+                        <h4 id="card-title-integration" class="font-semibold text-lg text-gem-dark">Dễ dàng tích hợp</h4>
+                        <p class="mt-2 text-slate-600">API rõ ràng để kết nối với POS và các hệ thống bán hàng hiện có.</p>
+                        <div class="mt-4">
+                            <a href="#" class="text-gem-mid font-semibold hover:underline" aria-label="Xem tài liệu API tích hợp">API docs</a>
+                        </div>
+                    </div>
                 </div>
-                <h4 class="font-semibold text-lg text-gem-dark">Bảo mật đa tầng</h4>
-                <p class="mt-2 text-slate-600">Mọi giao dịch được mã hóa AES-256 và tuân thủ tiêu chuẩn PCI DSS.</p>
-            </div>
+            </article>
 
-            <div class="card-feature">
-                <div class="badge">
-                    <svg class="h-5 w-5 text-gem-dark" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M14 2H6v20h12V8Z"/>
-                    </svg>
+            <article class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-transform duration-200 ease-out transform hover:-translate-y-1" aria-labelledby="card-title-security">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 bg-gem-light/10 text-gem-dark rounded-full p-3">
+                        <span class="text-2xl" aria-hidden="true">🔒</span>
+                    </div>
+                    <div>
+                        <h4 id="card-title-security" class="font-semibold text-lg text-gem-dark">Bảo mật đa tầng</h4>
+                        <p class="mt-2 text-slate-600">Mã hóa và tuân thủ tiêu chuẩn bảo mật để bảo vệ giao dịch và dữ liệu khách hàng.</p>
+                        <div class="mt-4">
+                            <a href="#" class="text-gem-mid font-semibold hover:underline" aria-label="Chi tiết về bảo mật">Chi tiết bảo mật</a>
+                        </div>
+                    </div>
                 </div>
-                <h4 class="font-semibold text-lg text-gem-dark">Phân tích bán hàng</h4>
-                <p class="mt-2 text-slate-600">Báo cáo thời gian thực về sản phẩm, doanh thu và hành vi người mua.</p>
-            </div>
+            </article>
 
-            <div class="card-feature">
-                <div class="badge">
-                    <svg class="h-5 w-5 text-gem-dark" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M12 2c5 0 9 4 9 9s-4 9-9 9-9-4-9-9 4-9 9-9Z"/>
-                    </svg>
+            <article class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-transform duration-200 ease-out transform hover:-translate-y-1" aria-labelledby="card-title-analytics">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 bg-gem-light/10 text-gem-dark rounded-full p-3">
+                        <span class="text-2xl" aria-hidden="true">📈</span>
+                    </div>
+                    <div>
+                        <h4 id="card-title-analytics" class="font-semibold text-lg text-gem-dark">Phân tích bán hàng</h4>
+                        <p class="mt-2 text-slate-600">Báo cáo thời gian thực về sản phẩm, doanh thu và xu hướng mua hàng.</p>
+                        <div class="mt-4">
+                            <a href="#" class="text-gem-mid font-semibold hover:underline" aria-label="Xem báo cáo phân tích bán hàng">Xem báo cáo</a>
+                        </div>
+                    </div>
                 </div>
-                <h4 class="font-semibold text-lg text-gem-dark">Hiệu quả vượt trội</h4>
-                <p class="mt-2 text-slate-600">Giảm 80% thời gian thanh toán và 50% chi phí nhân sự vận hành.</p>
-            </div>
+            </article>
+
+            <article class="bg-white rounded-2xl p-6 shadow-md hover:shadow-xl transition-transform duration-200 ease-out transform hover:-translate-y-1" aria-labelledby="card-title-efficiency">
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 bg-gem-light/10 text-gem-dark rounded-full p-3">
+                        <span class="text-2xl" aria-hidden="true">✨</span>
+                    </div>
+                    <div>
+                        <h4 id="card-title-efficiency" class="font-semibold text-lg text-gem-dark">Hiệu quả vượt trội</h4>
+                        <p class="mt-2 text-slate-600">Tiết kiệm thời gian và chi phí vận hành, tối ưu trải nghiệm khách hàng.</p>
+                        <div class="mt-4">
+                            <a href="#" class="text-gem-mid font-semibold hover:underline" aria-label="Tìm hiểu về hiệu quả">Tìm hiểu thêm</a>
+                        </div>
+                    </div>
+                </div>
+            </article>
+
         </div>
     </div>
 </section>
@@ -166,7 +199,7 @@
     <div class="container mx-auto px-4">
         <div class="cta-box">
             <h3 class="text-xl md:text-2xl font-bold">Trải nghiệm thanh toán không chạm với Zascapay ngay hôm nay</h3>
-            <a href="#contact" class="mt-6 inline-block btn-primary px-6 py-3 rounded-full">Liên hệ tư vấn</a>
+            <a href="#contact" class="mt-6 inline-block btn-primary px-6 py-3 rounded-full" aria-label="Liên hệ tư vấn giải pháp">Liên hệ tư vấn</a>
         </div>
     </div>
 </section>
@@ -176,12 +209,15 @@
     <h3 class="text-center text-2xl font-bold">Liên hệ với chúng tôi</h3>
     <p class="mt-2 text-center text-slate-600">Hãy để lại thông tin, đội ngũ Zascapay sẽ liên hệ tư vấn giải pháp phù hợp nhất cho doanh nghiệp của bạn.</p>
 
-    <form class="mt-8 mx-auto max-w-3xl grid gap-4">
-        <input type="text" placeholder="Họ và tên"
+    <form class="mt-8 mx-auto max-w-3xl grid gap-4" method="post" action="#">
+        <label for="contact-name" class="sr-only">Họ và tên</label>
+        <input id="contact-name" name="name" type="text" placeholder="Họ và tên"
                class="w-full rounded-lg border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gem-mid"/>
-        <input type="email" placeholder="Email"
+        <label for="contact-email" class="sr-only">Email</label>
+        <input id="contact-email" name="email" type="email" placeholder="Email"
                class="w-full rounded-lg border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gem-mid"/>
-        <textarea rows="6" placeholder="Nội dung liên hệ"
+        <label for="contact-message" class="sr-only">Nội dung liên hệ</label>
+        <textarea id="contact-message" name="message" rows="6" placeholder="Nội dung liên hệ"
                   class="w-full rounded-lg border border-slate-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-gem-mid"></textarea>
         <button type="submit"
                 class="justify-self-start btn-primary rounded-full px-6 py-3 font-semibold">
