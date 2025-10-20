@@ -28,7 +28,7 @@ cd "./zascapay"
 pwd
 ls
 python manage.py collectstatic --noinput
-python manage.py makemigrations --noinput --fake
+python manage.py makemigrations --noinput
 python manage.py migrate --noinput --fake
 #python manage.py add --file ../yolo_names.json
 
