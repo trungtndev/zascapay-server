@@ -1,0 +1,150 @@
+{% load static %}
+
+<!-- Modal: Chỉnh sửa cửa hàng (rich layout like screenshot) -->
+<div id="edit_store_model" class="fixed inset-0 bg-black/30 hidden items-center justify-center z-50">
+  <div class="w-full max-w-[860px] mx-4 rounded-2xl bg-white shadow-md overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="editStoreModalTitle">
+    <div class="store-modal-scroll">
+      <div class="px-4 py-3 flex items-center justify-between sticky-header border-b border-slate-200 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <h3 id="editStoreModalTitle" class="font-semibold text-lg">Chỉnh sửa Cửa Hàng</h3>
+        </div>
+        <button id="closeEditModalBtn" class="flex items-center gap-2 text-slate-600 hover:bg-slate-100 px-3 py-1 rounded-md" type="button" aria-label="Đóng" title="Đóng">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" style="fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;"><path d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <form id="editStoreForm" class="p-4" method="post" action="#" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" id="editStoreId" />
+
+        <!-- Thông Tin Cơ Bản -->
+        <div class="rounded-2xl border border-slate-200 bg-[#f5f8ff] p-6 mb-6">
+          <h2 class="text-xl font-bold mb-4">Thông Tin Cơ Bản</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="editCode">Mã Khách Hàng</label>
+              <input id="editCode" name="code" type="text" placeholder="VD: CHK-001-042"
+                     class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="editName">Tên Hiển Thị</label>
+              <input id="editName" name="name" type="text" placeholder="Tên hiển thị"
+                     class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="editCategory">Loại Thiết Bị</label>
+              <select id="editCategory" name="category" class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid">
+                <option value="">Chọn loại</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="editAddress">Địa Điểm</label>
+              <input id="editAddress" name="address" type="text" placeholder="Ví dụ: Cửa Hàng #042"
+                     class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="editIp">Địa Chỉ IP</label>
+              <input id="editIp" name="ip_address" type="text" placeholder="192.168.1.42"
+                     class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="editPort">Cổng Kết Nối</label>
+              <input id="editPort" name="port" type="text" placeholder="8080"
+                     class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+
+            <!-- Mô tả (di chuyển vào trong grid để cấu trúc hợp lệ) -->
+            <div class="md:col-span-2 mt-2">
+              <label class="block text-sm font-medium mb-1" for="editDesc">Mô tả</label>
+              <textarea id="editDesc" name="description" rows="3" placeholder="Mô tả thêm về cửa hàng"
+                        class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cấu Hình Mô Hình -->
+        <div class="rounded-2xl border border-slate-200 bg-[#f5faff] p-6 mb-6">
+          <h2 class="text-xl font-bold mb-4">Cấu Hình Mô Hình</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-2">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="editModelVersion">Phiên Bản Mô Hình</label>
+              <select id="editModelVersion" name="model_version" class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid">
+                <option value="">Chọn phiên bản</option>
+                <option value="v2.1.5">v2.1.5 (Hiện Tại)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="editConfidenceDecimal">Ngưỡng Tin Cậy</label>
+              <div class="flex items-center gap-3">
+                <input id="editConfidenceDecimal" name="confidence_decimal" type="number" step="0.01" min="0" max="1" value="0.85" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+                <div id="editConfidenceDecimalLabel" class="w-16 text-sm text-slate-600 text-right">0.85</div>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="editFrequency">Tần Suất Cập Nhật (giờ)</label>
+              <input id="editFrequency" name="frequency" type="number" min="1" value="24" class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="editStatus">Chế Độ Hoạt Động</label>
+              <select id="editStatus" name="status" class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid">
+                <option value="active">Tự Động</option>
+                <option value="inactive">Tắt</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cài Đặt Phản Hồi -->
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-6">
+          <h2 class="text-xl font-bold mb-4">Cài Đặt Phản Hồi</h2>
+          <div class="grid grid-cols-1 gap-4">
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <span class="font-medium">Gửi Phản Hồi Tự Động</span>
+                <span class="text-sm text-slate-500 block">Tự động gửi kết quả nhận diện về máy chủ</span>
+              </div>
+              <input id="editAutoFeedback" type="checkbox" class="accent-orange-600" aria-label="Gửi phản hồi tự động" />
+            </div>
+
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <span class="font-medium">Thu Thập Dữ Liệu Không Chắc Chắn</span>
+                <span class="text-sm text-slate-500 block">Gửi các mẫu có độ tin cậy thấp để cải thiện mô hình</span>
+              </div>
+              <input id="editCollectUncertain" type="checkbox" class="accent-orange-600" aria-label="Thu thập dữ liệu không chắc chắn" />
+            </div>
+
+            <div class="flex items-center justify-between gap-4">
+              <div>
+                <span class="font-medium">Báo Cáo Lỗi Tự Động</span>
+                <span class="text-sm text-slate-500 block">Gửi thông báo khi có lỗi hệ thống</span>
+              </div>
+              <input id="editAutoErrorReport" type="checkbox" class="accent-slate-400" aria-label="Báo cáo lỗi tự động" />
+            </div>
+          </div>
+        </div>
+
+        <div id="editFormError" class="mt-3 text-sm text-orange-600 hidden"></div>
+
+        <div class="flex justify-end gap-4 mt-6">
+          <button type="button" id="cancelEditBtn" class="px-6 py-2 rounded-lg bg-white border border-slate-200">Hủy</button>
+          <button type="button" id="saveEditBtn" class="px-6 py-2 rounded-lg bg-[#2415cc] text-white font-semibold">Lưu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.store-modal-scroll { max-height: calc(100vh - 4rem); overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none; }
+.store-modal-scroll::-webkit-scrollbar { display: none; }
+.sticky-header { position: sticky; top: 0; z-index: 20; background: white; }
+</style>

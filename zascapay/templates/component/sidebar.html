@@ -25,7 +25,7 @@
             <img class="h-4 w-4" src="{% static 'images/product.svg' %}" alt="Sản Phẩm"/>
             <span>Sản Phẩm</span>
         </a>
-        <a href="#"
+        <a href="{% url 'store_list' %}"
            class="mt-1 flex items-center gap-3 rounded-lg px-3 py-2 {% if active_menu == 'customers' %}bg-orange-600 text-white{% else %}hover:bg-slate-100{% endif %}">
             <img class="h-4 w-4" src="{% static 'images/custumer.svg' %}" alt="Khách Hàng"/>
             <span>Khách Hàng</span>

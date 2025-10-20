@@ -21,7 +21,7 @@ urlpatterns = [
 
     # Category API
     path('api/categories/', ProductCategoryViewSet.as_view({'get': 'list', 'post': 'create'}), name='category-list'),
-    path('api/categories/<int:pk>/', ProductCategoryViewSet.as_view({
+    path('api/categories/<int:pk>/',  ProductCategoryViewSet.as_view({
         'get': 'retrieve',
         'patch': 'partial_update',
         'put': 'update',

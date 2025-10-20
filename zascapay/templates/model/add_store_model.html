@@ -1,0 +1,164 @@
+{% load static %}
+
+<!-- Modal: Thêm / Chỉnh sửa Khách Hàng (store) -->
+<div id="add_store_model" class="fixed inset-0 bg-black/30 hidden items-center justify-center z-50">
+  <div class="w-full max-w-[860px] mx-4 rounded-2xl bg-white shadow-md overflow-hidden" role="dialog" aria-modal="true" aria-labelledby="storeModalTitle">
+    <div class="store-modal-scroll">
+      <div class="px-4 py-3 flex items-center justify-between sticky-header border-b border-slate-200 rounded-t-2xl">
+        <div class="flex items-center gap-3">
+          <h3 id="storeModalTitle" class="font-semibold text-lg">Thông Tin Cơ Bản</h3>
+        </div>
+        <button id="closeModalBtn" class="flex items-center gap-2 text-slate-600 hover:bg-slate-100 px-3 py-1 rounded-md" type="button" aria-label="Đóng" title="Đóng">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" style="fill:none; stroke:currentColor; stroke-width:2; stroke-linecap:round; stroke-linejoin:round;">
+            <path d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <form id="storeModalForm" class="p-4" method="post" action="#" enctype="multipart/form-data">
+        {% csrf_token %}
+        <input type="hidden" id="storeId" name="storeId"/>
+
+        <div class="rounded-2xl border border-slate-200 bg-[#f5f8ff] p-6 mb-6">
+          <h2 class="text-xl font-bold mb-4">Thông Tin Cơ Bản</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="fName">Tên Khách hàng *</label>
+              <input id="fName" name="name" type="text" required placeholder="VD: Cửa hàng #042, Quầy thanh toán"
+                     class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="fCode">Mã Khách Hàng *</label>
+              <input id="fCode" name="code" type="text" required placeholder="VD: CH-042"
+                     class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="fAddress">Vị trí *</label>
+              <input id="fAddress" name="address" type="text" placeholder="VD: Cửa hàng #042, Lối 3" required
+                     class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="fCategory">Danh mục/Loại</label>
+              <select id="fCategory" name="category" class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid">
+                <option value="">Chọn danh mục</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="fStatus">Trạng thái</label>
+              <select id="fStatus" name="status" class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid">
+                <option value="active">Hoạt Động</option>
+                <option value="inactive">Ngừng</option>
+              </select>
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium mb-1" for="fDesc">Mô tả</label>
+              <textarea id="fDesc" name="description" rows="3" placeholder="Chi tiết bổ sung về thiết bị khách hàng..."
+                        class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid"></textarea>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-[#e7edfb] p-6 mb-6">
+          <h2 class="text-xl font-bold mb-4">Cấu hình Kỹ thuật</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium mb-1" for="ipAddress">Địa chỉ IP</label>
+              <input id="ipAddress" name="ip_address" type="text" placeholder="192.168.1.100"
+                     class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1" for="port">Cổng</label>
+              <input id="port" name="port" type="text" placeholder="8080"
+                     class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid" />
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="apiVersion">Phiên bản API</label>
+              <select id="apiVersion" name="api_version" class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid">
+                <option value="">Chọn phiên bản API</option>
+                <option value="v2.1">v2.1 (Mới nhất)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="modelVersion">Phiên bản Mô hình</label>
+              <select id="modelVersion" name="model_version" class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid">
+                <option value="">Chọn phiên bản mô hình</option>
+                <option value="v3.2">Mới nhất (v3.2)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-200 bg-white p-6 mb-6">
+          <h2 class="text-xl font-bold mb-4">Cài đặt Nhận diện</h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+            <div>
+              <label for="confidenceDecimal" class="block text-sm font-medium mb-2">Ngưỡng Tin cậy</label>
+              <div class="flex items-center gap-3">
+                <input id="confidenceDecimal" name="confidence_decimal" type="number" step="0.01" min="0" max="1" value="0.85" class="w-full rounded-lg border border-slate-300 px-3 py-2" />
+                <div id="confidenceDecimalLabel" class="w-16 text-sm text-slate-600 text-right">0.85</div>
+              </div>
+              <div class="mt-2 text-xs text-slate-400 flex justify-between">
+                <span>0.00</span>
+                <span>1.00</span>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1" for="frequency">Tần suất Nhận diện</label>
+              <select id="frequency" name="frequency" class="w-full rounded-lg border border-slate-300 px-4 py-3 bg-white focus:outline-none focus:ring-2 focus:ring-gem-mid">
+                <option value="24">24</option>
+                <option value="12">12</option>
+                <option value="1">1</option>
+              </select>
+
+              <div class="mt-4 text-sm">
+                <label class="flex items-center gap-2">
+                  <input id="enableLearning" name="enable_learning" type="checkbox" class="accent-orange-600" />
+                  <span>Bật học tích cực cho khách hàng này</span>
+                </label>
+
+                <label class="flex items-center gap-2 mt-2">
+                  <input id="sendFeedback" name="send_feedback" type="checkbox" class="accent-orange-600" />
+                  <span>Gửi dữ liệu phản hồi để cải thiện mô hình</span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Form error -->
+        <div id="formError" class="mt-3 text-sm text-orange-600 hidden"></div>
+
+        <div class="flex justify-end gap-4 mt-6">
+          <button type="button" id="cancelAddStoreBtn" class="px-6 py-2 rounded-lg bg-orange-600 text-white font-semibold">Hủy</button>
+          <button type="button" id="saveStoreBtn" class="px-6 py-2 rounded-lg bg-[#2415cc] text-white font-semibold flex items-center gap-2">Lưu Khách Hàng</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<style>
+.store-modal-scroll {
+  max-height: calc(100vh - 4rem);
+  overflow-y: auto;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.store-modal-scroll::-webkit-scrollbar { display: none; } /* Chrome, Safari */
+
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: white;
+}
+</style>
