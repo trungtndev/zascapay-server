@@ -19,6 +19,8 @@ class User(AbstractUser):
 
     phone = models.CharField(max_length=20, blank=True)
     account_type = models.CharField(max_length=20, choices=ACCOUNT_TYPE_CHOICES, blank=True)
+    is_approved = models.BooleanField(default=False, help_text="Chỉ khi admin duyệt thì mới được hoạt động.")
+    is_system_admin = models.BooleanField(default=False, help_text="Admin có toàn quyền trên hệ thống.")
     
     # Link to a store if the user is a store owner or staff
     store = models.ForeignKey(

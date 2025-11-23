@@ -13,7 +13,7 @@ from rest_framework.permissions import IsAuthenticated
 from typing import cast
 import logging
 
-from .models import StoreCategory
+from .models import StoreCategory, Store
 from .serializers import StoreSerializer, StoreCategorySerializer
 from .services import (
     compute_store_metrics,
@@ -48,18 +48,23 @@ class StoreViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         request = cast(Request, cast(object, self.request))
-        return filter_stores(request.query_params)
+        # Only show stores of the current authenticated user
+        return filter_stores(request.query_params, owner=request.user)
 
     def perform_create(self, serializer):
         data = dict(serializer.validated_data)
         # confidence is a write-only UI field (slider) not persisted on the model
         data.pop('confidence', None)
+        # Attach owner to the new store
+        data['owner'] = self.request.user
         instance = create_store(data)
         serializer.instance = instance
 
     def perform_update(self, serializer):
         data = dict(serializer.validated_data)
         data.pop('confidence', None)
+        # Prevent changing owner via update
+        data.pop('owner', None)
         instance = update_store(self.get_object(), data)
         serializer.instance = instance
 
@@ -75,12 +80,13 @@ class StoreViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['get'])
     def metrics(self, request):
-        data = compute_store_metrics()
+        # Metrics only for the current user's stores
+        data = compute_store_metrics(owner=request.user)
         return Response(data)
 
     @action(detail=False, methods=['get'])
     def export(self, request):
-        qs = filter_stores(request.query_params).order_by('name')
+        qs = filter_stores(request.query_params, owner=request.user).order_by('name')
         headers = [
             'id','name','code','category_name','status','address',
             'last_updated_at','is_deleted'
@@ -110,14 +116,19 @@ class StoreViewSet(viewsets.ModelViewSet):
         resp['Content-Disposition'] = 'attachment; filename="stores_export.csv"'
         return resp
 
+    def _filter_ids_owned_by_user(self, ids):
+        # Limit bulk operations to stores owned by the current user
+        return list(Store.objects.filter(owner=self.request.user, id__in=ids).values_list('id', flat=True))
+
     @action(detail=False, methods=['post'])
     def bulk_restart(self, request):
         ids = request.data.get('ids') or []
         if not isinstance(ids, (list, tuple)):
             return Response({'detail': 'ids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+        owned_ids = self._filter_ids_owned_by_user(ids)
         count = 0
         try:
-            count = bulk_restart_stores(ids)
+            count = bulk_restart_stores(owned_ids)
         except Exception as e:
             logger.exception('bulk_restart failed')
             return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -129,7 +140,7 @@ class StoreViewSet(viewsets.ModelViewSet):
         if not isinstance(ids, (list, tuple)):
             return Response({'detail': 'ids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            count = bulk_send_alert(ids)
+            count = bulk_send_alert(self._filter_ids_owned_by_user(ids))
         except Exception as e:
             logger.exception('bulk_alert failed')
             return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -141,7 +152,7 @@ class StoreViewSet(viewsets.ModelViewSet):
         if not isinstance(ids, (list, tuple)):
             return Response({'detail': 'ids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            count = bulk_update_model(ids)
+            count = bulk_update_model(self._filter_ids_owned_by_user(ids))
         except Exception as e:
             logger.exception('bulk_update_model failed')
             return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -153,7 +164,7 @@ class StoreViewSet(viewsets.ModelViewSet):
         if not isinstance(ids, (list, tuple)):
             return Response({'detail': 'ids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
         try:
-            count = bulk_configure(ids)
+            count = bulk_configure(self._filter_ids_owned_by_user(ids))
         except Exception as e:
             logger.exception('bulk_configure failed')
             return Response({'detail': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

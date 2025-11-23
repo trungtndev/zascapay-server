@@ -1,7 +1,12 @@
 from django.db import models
 from django.conf import settings
 from django.core.validators import MinValueValidator
-from product.models import Product
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # Help static type checkers/language servers resolve the `product` module
+    # without importing it at runtime.
+    import product  # noqa: F401
 
 class Order(models.Model):
     """Đơn hàng."""
@@ -32,7 +37,7 @@ class Order(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='orders',
+        related_name='+',
     )
     status = models.CharField(max_length=20, choices=Status.choices, default=Status.PENDING)
     total_amount = models.DecimalField(max_digits=12, decimal_places=2, validators=[MinValueValidator(0)])
@@ -119,8 +124,8 @@ class Payment(models.Model):
         null=True,
         blank=True,
     )
-    user = models.ForeignKey(
-        settings.AUTH_USER_MODEL,
+    store = models.ForeignKey(
+        'store.Store',
         on_delete=models.SET_NULL,
         related_name='payments',
         null=True,
@@ -139,10 +144,12 @@ class Payment(models.Model):
         indexes = [
             models.Index(fields=['order'], name='idx_payments_order'),
             models.Index(fields=['status'], name='idx_payments_status'),
+            models.Index(fields=['store'], name='idx_payments_store'),
         ]
         verbose_name = 'Thanh toán'
         verbose_name_plural = 'Thanh toán'
 
     def __str__(self) -> str:  # pragma: no cover
         order_info = f"Order #{self.order.pk}" if self.order else "No-Order"
-        return f"Payment #{self.pk} - {order_info} - {self.status}"
+        store_info = f"Store #{self.store.pk}" if self.store else "No-Store"
+        return f"Payment #{self.pk} - {order_info} - {store_info} - {self.status}"

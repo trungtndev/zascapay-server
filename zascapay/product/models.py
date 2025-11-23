@@ -43,7 +43,6 @@ class Product(models.Model):
     last_updated_at = models.DateTimeField(auto_now=True)
     image_url = models.URLField(blank=True, null=True)
     is_deleted = models.BooleanField(default=False)
-    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
 
     class Meta:
         db_table = 'product'
@@ -61,7 +60,8 @@ class Product(models.Model):
 
 
 class Detection(models.Model):
-    """Class detection được phát hiện bởi YOLO, liên kết tới `Product`."""
+    """Class detection được phát hiện bởi YOLO, liên kết tới `Product`. Không liên kết tới `store`.
+    """
     id = models.AutoField(primary_key=True)
     name = models.CharField(max_length=200)
     accuracy = models.DecimalField(
@@ -77,21 +77,12 @@ class Detection(models.Model):
         related_name='detections',
         db_column='product_id',
     )
-    store = models.ForeignKey(
-        'store.Store',
-        on_delete=models.CASCADE,
-        related_name='detections',
-        db_column='store_id',
-        null=True, # Detections can be unassociated with a store
-        blank=True,
-    )
 
     class Meta:
         db_table = 'detection'
         indexes = [
             models.Index(fields=['name'], name='idx_det_name'),
             models.Index(fields=['product'], name='idx_det_product'),
-            models.Index(fields=['store'], name='idx_det_store'),
         ]
         verbose_name = 'Detection'
         verbose_name_plural = 'Detections'

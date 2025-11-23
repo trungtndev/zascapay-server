@@ -1,5 +1,10 @@
 from django.db import models
 from django.conf import settings
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    # Allow type checkers to resolve 'product' module used in string FKs
+    import product  # noqa: F401
 
 class StoreCategory(models.Model):
     name = models.CharField(max_length=150, unique=True)
@@ -62,10 +67,11 @@ class Store(models.Model):
         return f"{self.name} ({self.code})"
 
 class StoreInventory(models.Model):
-    """Links products to a store, creating a many-to-many relationship."""
+    """Links products to a store, creating a many-to-many relationship with per-store price."""
     store = models.ForeignKey(Store, on_delete=models.CASCADE, related_name='inventory')
     product = models.ForeignKey('product.Product', on_delete=models.CASCADE, related_name='stores')
     quantity = models.PositiveIntegerField(default=0)
+    price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     added_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -44,6 +44,9 @@ except Exception:
     _HAS_CV2 = False
 logger = logging.getLogger(__name__)
 
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from store.models import Store, StoreInventory
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 print("Device", device)
 
@@ -67,7 +70,7 @@ class ProductViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     # Lazy-loaded class-level model reference to avoid reloading per request
-    yolo_model = YOLO("yolo12n.pt", verbose=False).to(device)
+    # yolo_model = YOLO("retail2.pt", verbose=False).to(device)
 
     def get_queryset(self):
         request = cast(Request, cast(object, self.request))
@@ -76,14 +79,16 @@ class ProductViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         """Create product from limited fields (form) and handle optional image uploads.
 
-        Only accept: name, sku, category, price, description from request.data. Files from
+        Only accept: name, sku, category, description from request.data. Files from
         request.FILES under key 'images' (multiple allowed) - we save the first image and set image_url.
+
+        Note: price is now per-store and stored on StoreInventory, not on Product.
         """
-        # Extract allowed fields only
-        allowed = ('name', 'sku', 'category', 'price', 'description')
+        # Extract allowed fields only (Product no longer has price field)
+        allowed = ('name', 'sku', 'category', 'description')
         payload = {k: request.data.get(k) for k in allowed if request.data.get(k) is not None and request.data.get(k) != ''}
 
-        # Log incoming payload and files for debugging (helps verify price is received)
+        # Log incoming payload and files for debugging
         try:
             file_keys = []
             if hasattr(request, 'FILES'):
@@ -185,17 +190,45 @@ class ProductViewSet(viewsets.ModelViewSet):
         return resp
 
 class ScanAPIView(APIView):
-    """Public API endpoint for scanning an image.
+    """API scan ảnh yêu cầu xác thực.
 
-    Accepts JSON {"image": "data:image/...;base64,..."} or multipart/form-data with file field 'image' or 'file'.
-    This read-only variant does NOT write to the database; it only returns the detected classes and the annotated image.
+    - Bắt buộc gửi token (DRF Token hoặc session) để biết user hiện tại.
+    - Chỉ trả về sản phẩm thuộc store của user đó.
+      + Nếu user.user.store không null -> dùng store này.
+      + Nếu user không có store gắn trực tiếp thì thử tìm store mà user là owner.
+    - Không ghi vào DB, chỉ đọc Product / StoreInventory và trả về ảnh đã annotate.
     """
-    permission_classes = [AllowAny]
-    authentication_classes = []  # disable session authentication & CSRF for this endpoint
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
     parser_classes = [JSONParser, MultiPartParser, FormParser]
-    yolo_model = YOLO("yolo12n.pt", verbose=False).to(device)
+    yolo_model = YOLO("retail2.pt").to(device)
+
+    def _get_user_store(self, user):
+        """Tìm store gắn với user.
+
+        Ưu tiên user.store (FK trên model User). Nếu không có thì
+        tìm store mà user là owner, lấy cái đầu tiên.
+        """
+        if not user or not user.is_authenticated:
+            return None
+
+        # 1) nếu User có FK trực tiếp tới store
+        store = getattr(user, 'store', None)
+        if store is not None:
+            return store
+
+        # 2) fallback: tìm store mà user là owner
+        try:
+            return Store.objects.filter(owner=user).first()
+        except Exception:
+            return None
 
     def post(self, request, format=None):
+        # Lấy store của user
+        store = self._get_user_store(request.user)
+        if store is None:
+            return Response({'detail': 'User hiện tại không có store liên kết.'}, status=status.HTTP_400_BAD_REQUEST)
+
         # support base64 field or uploaded file
         image_b64 = request.data.get('image')
         image_file = None
@@ -218,33 +251,50 @@ class ScanAPIView(APIView):
         try:
             image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
 
-            results = self.yolo_model(image)
+            results = self.yolo_model(
+                image,
+                conf=0.75,
+                iou=0.65
+            )
             result = results[0]
 
             labels = result.names
             boxes = result.boxes
 
             detections_data = []
-            annotated = result.plot(conf=False, probs=False)
+            annotated = result.plot()
 
-            # Only read product info for mapping; do NOT modify DB or create Detection rows
+            # Chỉ lấy product thuộc đúng store của user thông qua StoreInventory
             for cls_id, conf in zip(boxes.cls.tolist(), boxes.conf.tolist()):
                 cls_name = labels[int(cls_id)]
                 accuracy = round(float(conf) * 100, 2)
 
-                # map to product if exists (read-only)
-                product = Product.objects.filter(name__iexact=cls_name).first()
+                # Lấy inventory cho store hiện tại + tên class YOLO (match theo product.name)
+                inventory = (
+                    StoreInventory.objects
+                    .select_related('product', 'store')
+                    .filter(store=store, product__name__iexact=cls_name)
+                    .first()
+                )
 
-                detections_data.append({
-                    'product_id': product.id,
-                    'product_name': product.name,
-                    'price': str(product.price) if product else None,
-                })
+                if inventory and inventory.product:
+                    detections_data.append({
+                        'product_id': inventory.product.id,
+                        'product_name': inventory.product.name,
+                        'store_id': inventory.store.id,
+                        'store_name': inventory.store.name,
+                        'price': str(inventory.price) if inventory.price is not None else None,
+                        'quantity': inventory.quantity,
+                        'accuracy': accuracy,
+                    })
+
+            if not _HAS_CV2:
+                return Response({'detail': 'OpenCV (cv2) không khả dụng trên server.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
             buf = io.BytesIO()
             img = Image.fromarray(cv2.cvtColor(annotated, cv2.COLOR_BGR2RGB))
-            img.save(buf, format='JPEG')  # ghi ảnh vào buffer
-            buf.seek(0)  # quay về đầu buffer
+            img.save(buf, format='JPEG')
+            buf.seek(0)
             annotated_b64 = base64.b64encode(buf.getvalue()).decode()
 
             return Response({

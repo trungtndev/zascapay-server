@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Product, ProductCategory
+from .models import Product, ProductCategory, Detection
 
 
 class ProductCategorySerializer(serializers.ModelSerializer):
@@ -37,7 +37,6 @@ class ProductSerializer(serializers.ModelSerializer):
             'last_updated_at',
             'created_at',
             'image_url',
-            'price',
             'is_deleted',
         ]
         read_only_fields = ['id', 'last_updated_at', 'created_at']
@@ -59,7 +58,6 @@ class ProductSerializer(serializers.ModelSerializer):
 # ------------------------------------------------------------------
 # Detection serializer used by the scan API
 # ------------------------------------------------------------------
-from .models import Detection
 
 
 class DetectionSerializer(serializers.ModelSerializer):

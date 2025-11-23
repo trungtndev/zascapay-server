@@ -53,7 +53,7 @@ class OrderCreateSerializer(serializers.Serializer):
 class PaymentSerializer(serializers.ModelSerializer):
     # expose the related order's primary key under `order_id` (Order model uses `order_id`)
     order_id = serializers.IntegerField(source='order.order_id', read_only=True)
-    user_id = serializers.IntegerField(source='user.id', read_only=True)
+    store_id = serializers.IntegerField(source='store.id', read_only=True)
     # amount is not stored on Payment model any more; expose it from the related Order when available
     amount = serializers.SerializerMethodField()
     # include purchased items from the related order (compact fields)
@@ -61,7 +61,7 @@ class PaymentSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Payment
-        fields = ['id', 'order_id', 'user_id', 'amount', 'items', 'currency', 'method', 'provider_transaction_id', 'status', 'processed_at', 'created_at', 'metadata']
+        fields = ['id', 'order_id', 'store_id', 'amount', 'items', 'currency', 'method', 'provider_transaction_id', 'status', 'processed_at', 'created_at', 'metadata']
         read_only_fields = ['id', 'status', 'processed_at', 'created_at']
 
     def get_amount(self, obj):
@@ -73,6 +73,8 @@ class PaymentSerializer(serializers.ModelSerializer):
 class PaymentCreateSerializer(serializers.Serializer):
     # Client must provide order_id only; amount is derived from Order.total_amount on server
     order_id = serializers.IntegerField(required=True)
+    # Allow clients to optionally specify the store that will be linked to the payment
+    store_id = serializers.IntegerField(required=False)
     currency = serializers.CharField(default='VND')
     # Make method optional with a default so clients don't need to include it
     method = serializers.ChoiceField(choices=[(m.value, m.label) for m in Payment.Method], required=False, default=Payment.Method.CARD)

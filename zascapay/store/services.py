@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Mapping
+from typing import Mapping, Optional
 
 from django.db import models
 from django.db.models import Avg
@@ -9,8 +9,12 @@ from django.utils import timezone
 
 from .models import Store, StoreCategory
 
-def filter_stores(params: Mapping[str, str]) -> QuerySet[Store]:
+def filter_stores(params: Mapping[str, str], *, owner: Optional[object] = None) -> QuerySet[Store]:
     qs = Store.objects.select_related('category').all()
+
+    # Scope by owner if provided
+    if owner is not None:
+        qs = qs.filter(owner=owner)
 
     include_deleted = str(params.get('include_deleted', '')).lower() in {'1', 'true'}
     if not include_deleted:
@@ -64,8 +68,10 @@ def restore_store(instance: Store) -> Store:
     instance.save(update_fields=['is_deleted', 'last_updated_at'])
     return instance
 
-def compute_store_metrics() -> dict:
+def compute_store_metrics(*, owner: Optional[object] = None) -> dict:
     qs = Store.objects.filter(is_deleted=False)
+    if owner is not None:
+        qs = qs.filter(owner=owner)
     total = qs.count()
     active = qs.filter(status=Store.Status.ACTIVE).count()
     avg_acc = qs.aggregate(avg_acc=Avg('accuracy_rate'))['avg_acc'] or 0

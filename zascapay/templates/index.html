@@ -9,6 +9,21 @@
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 <body class="antialiased text-slate-700">
+<!-- Message flash (hiển thị cảnh báo tài khoản chưa duyệt) -->
+{% if messages %}
+  <div class="fixed z-50 top-20 right-4 space-y-2 w-72">
+    {% for message in messages %}
+      <div class="px-4 py-3 rounded-lg shadow text-sm font-medium
+                  {% if message.tags == 'warning' %}bg-amber-50 text-amber-700 border border-amber-200
+                  {% elif message.tags == 'error' %}bg-red-50 text-red-700 border border-red-200
+                  {% elif message.tags == 'success' %}bg-emerald-50 text-emerald-700 border border-emerald-200
+                  {% else %}bg-slate-50 text-slate-700 border border-slate-200{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
+
 <!-- Header / Hero -->
 <header class="header relative overflow-hidden bg-gem-dark text-white min-h-[85vh] md:min-h-[95vh]">
     <nav class="fixed top-0 left-0 right-0 z-50 bg-gem-dark/90 backdrop-blur border-b border-white/10">

@@ -11,6 +11,7 @@ class UserSerializer(serializers.Serializer):
     first_name = serializers.CharField(max_length=150, allow_blank=True, required=False)
     last_name = serializers.CharField(max_length=150, allow_blank=True, required=False)
     is_active = serializers.BooleanField(required=False, default=True)
+    is_approved = serializers.BooleanField(read_only=True)
     password = serializers.CharField(write_only=True, required=False, allow_blank=False, style={'input_type': 'password'})
     date_joined = serializers.DateTimeField(read_only=True)
     last_login = serializers.DateTimeField(read_only=True, allow_null=True)

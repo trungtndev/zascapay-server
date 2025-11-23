@@ -5,8 +5,9 @@ from rest_framework import viewsets, status
 from rest_framework import mixins
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.permissions import IsAdminUser, AllowAny
-from django.contrib.auth import get_user_model
+from rest_framework.permissions import IsAdminUser, AllowAny, IsAuthenticated
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
+from django.db.models import Q
 import logging
 
 logger = logging.getLogger(__name__)
@@ -19,27 +20,23 @@ from .serializers import (
 )
 from .services import OrderService, PaymentService
 from .models import Order, Payment
-
-User = get_user_model()
+from store.models import Store
 
 
 class OrderViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.GenericViewSet):
-    """ViewSet for listing, retrieving, creating and managing orders.
-
-    - list: public (shows all orders).
-    - retrieve: public.
-    - create: allow anonymous clients to create orders if they provide `user_id` in payload; otherwise must be authenticated.
-    - cancel: POST action to cancel an order (owner or staff).
-    - pay: POST action to pay for an order (owner or staff) — authenticated or provide matching user_id.
-    """
     serializer_class = OrderSerializer
-    # Make order endpoints public (no auth required to view/create), but actions enforce ownership where needed
-    permission_classes = [AllowAny]
+    # Require auth via DRF Token or Session
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
     queryset = Order.objects.all().order_by('-created_at')
 
     def get_queryset(self):
-        # Public listing: return all orders
-        return super().get_queryset()
+        # Scope orders to the current user unless staff/system admin
+        qs = super().get_queryset()
+        user = getattr(self.request, 'user', None)
+        if user and (getattr(user, 'is_staff', False) or getattr(user, 'is_system_admin', False)):
+            return qs
+        return qs.filter(user=user)
 
     def get_serializer_class(self):
         if self.action == 'create':
@@ -54,12 +51,10 @@ class OrderViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
         shipping_address = data.get('shipping_address')
         currency = data.get('currency', 'VND')
         metadata = data.get('metadata')
-        # If request is authenticated, attach user; otherwise create order without user (store-managed)
-        user = request.user if (request.user and request.user.is_authenticated) else None
+        # Attach the authenticated user to the order
+        user = request.user
         order = OrderService.create_order(user, items=items, shipping_address=shipping_address, currency=currency, metadata=metadata)
         out = OrderSerializer(order, context={'request': request}).data
-
-        print("orders response:", out)
         return Response(out, status=status.HTTP_201_CREATED)
 
     @action(detail=True, methods=['post'], permission_classes=[IsAdminUser])
@@ -78,6 +73,8 @@ class OrderViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
         """Staff-only pay action: store owner triggers payment for an order.
 
         Client-supplied `amount` is rejected — amount is derived from the order's total_amount.
+        Optional `store_id` in request body links the payment to a specific store. If omitted,
+        the view will attempt to derive a store owned by the authenticated user (if any).
         """
         order = get_object_or_404(Order, pk=pk)
 
@@ -95,11 +92,19 @@ class OrderViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.Ge
         if amount <= 0:
             return Response({'detail': 'Order total_amount must be positive to create a payment.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Use staff user if authenticated, else None
-        pay_user = request.user if (request.user and request.user.is_authenticated) else None
+        # Determine store: prefer explicit store_id in request, else try to find a store owned by the user
+        store = None
+        store_id = request.data.get('store_id')
+        if store_id:
+            store = get_object_or_404(Store, pk=store_id)
+        else:
+            if request.user and request.user.is_authenticated:
+                # pick the first store owned by the user if any
+                store = Store.objects.filter(owner=request.user).first()
+
         try:
             payment = PaymentService.process_payment(
-                pay_user,
+                store,
                 order=order,
                 amount=amount,
                 currency=order.currency or 'VND',
@@ -115,16 +120,22 @@ class PaymentViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
     """ViewSet for payments. Creation triggers payment processing via PaymentService.
 
     Now requires only `order_id` in create requests: amount will be derived server-side from the order's total_amount.
+    Optionally accepts `store_id` to link the payment to a store.
     """
     serializer_class = PaymentSerializer
-    # Public payment endpoints (creation can be anonymous); admin-only for refund action remains
-    permission_classes = [AllowAny]
-    # optimize queries: include related order & user and prefetch order items used by serializer
-    queryset = Payment.objects.select_related('order', 'user').prefetch_related('order__items').order_by('-created_at')
+    # Require auth via DRF Token or Session
+    authentication_classes = [TokenAuthentication, SessionAuthentication]
+    permission_classes = [IsAuthenticated]
+    # optimize queries: include related order & store and prefetch order items used by serializer
+    queryset = Payment.objects.select_related('order', 'store').prefetch_related('order__items').order_by('-created_at')
 
     def get_queryset(self):
-        # Ensure the optimized queryset is used for list/retrieve to avoid N+1 when serializing items
-        return self.queryset
+        # Scope payments to user's orders or user's stores (owner)
+        user = getattr(self.request, 'user', None)
+        qs = self.queryset
+        if user and (getattr(user, 'is_staff', False) or getattr(user, 'is_system_admin', False)):
+            return qs
+        return qs.filter(Q(order__user=user) | Q(store__owner=user))
 
     def create(self, request, *args, **kwargs):
         # Log incoming request for debugging (payload and content type)
@@ -135,7 +146,7 @@ class PaymentViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
         logger.debug("Payment.create called. user=%s, content_type=%s, payload=%s", getattr(request, 'user', None), request.content_type, payload_snapshot)
 
         # Reject client-supplied amount to enforce server-side derivation
-        if 'amount' in payload_snapshot:
+        if isinstance(payload_snapshot, dict) and 'amount' in payload_snapshot:
             logger.warning("Payment.create rejected client-supplied amount: %s", payload_snapshot.get('amount'))
             return Response({'detail': 'Do not provide `amount`; it is derived from the order.'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -151,6 +162,11 @@ class PaymentViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
 
         order = get_object_or_404(Order, pk=order_id)
 
+        # Authorize: user must own the order or the store
+        user = request.user
+        if not (order.user_id == user.id or Store.objects.filter(owner=user, payments__order=order).exists() or Store.objects.filter(owner=user).exists()):
+            return Response({'detail': 'Not allowed for this order.'}, status=status.HTTP_403_FORBIDDEN)
+
         # Derive amount from order total_amount
         amount = order.total_amount
         try:
@@ -162,10 +178,17 @@ class PaymentViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, viewsets.
             return Response({'detail': 'Order total_amount must be positive to create a payment.'}, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            # determine payment user: prefer authenticated user, else None
-            pay_user = request.user if (request.user and request.user.is_authenticated) else None
+            # determine store: prefer explicit store_id in payload, else try to derive from authenticated user
+            store = None
+            store_id = data.get('store_id')
+            if store_id:
+                store = get_object_or_404(Store, pk=store_id)
+            else:
+                if request.user and request.user.is_authenticated:
+                    store = Store.objects.filter(owner=request.user).first()
+
             payment = PaymentService.process_payment(
-                pay_user,
+                store,
                 order=order,
                 amount=amount,
                 currency=data.get('currency', 'VND'),

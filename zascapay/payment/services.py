@@ -18,7 +18,7 @@ class PaymentService:
 
     @staticmethod
     @transaction.atomic
-    def process_payment(user, order: Optional[Order], amount: Decimal, currency: str, method: str, metadata: Optional[dict] = None) -> Payment:
+    def process_payment(store, order: Optional[Order], amount: Decimal, currency: str, method: str, metadata: Optional[dict] = None) -> Payment:
         # Basic validation
         if order and order.is_paid:
             raise ValueError('Order is already paid')
@@ -31,13 +31,13 @@ class PaymentService:
             if amount > order_total:
                 raise ValueError('Amount cannot exceed order total_amount')
 
-        # Simulate provider transaction id
-        provider_tx = f"SIM-{int(timezone.now().timestamp())}-{user.id if user else 'anon'}"
+        # Simulate provider transaction id; prefer store id when available to make ids more informative
+        provider_tx = f"SIM-{int(timezone.now().timestamp())}-{getattr(store, 'id', 'anon')}"
 
-        # Create Payment record — note: Payment model no longer stores amount; we keep order reference and other metadata
+        # Create Payment record — store is linked instead of user
         payment = Payment.objects.create(
             order=order,
-            user=user,
+            store=store,
             currency=currency,
             method=method,
             provider_transaction_id=provider_tx,

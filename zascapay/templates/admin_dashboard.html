@@ -1,0 +1,276 @@
+{% load static %}
+<!doctype html>
+<html lang="vi">
+<head>
+    <meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <title>Quản Trị Hệ Thống – Ascapay Admin</title>
+    <link rel="icon" href="{% static 'images/header-gem.svg' %}">
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+</head>
+<body class="antialiased bg-slate-50 text-slate-700">
+<div class="min-h-screen">
+    {% include 'component/admin_sidebar.html' with active_menu='overview' %}
+
+    <main class="md:ml-64">
+        <div class="container mx-auto px-4 py-6 space-y-10">
+            <!-- Overview -->
+            <section id="section-overview" class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <h1 class="text-2xl md:text-3xl font-bold">Quản Trị Hệ Thống</h1>
+                    <div class="text-sm text-slate-500">Theo dõi tình trạng người dùng, đơn hàng và giao dịch.</div>
+                </div>
+                <!-- KPI Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="rounded-2xl bg-gem-dark text-white p-5">
+                        <div class="text-sm opacity-90">Người Dùng Hoạt Động</div>
+                        <div id="statUsers" class="mt-2 text-2xl font-bold">{{ user_count }}</div>
+                    </div>
+                    <div class="rounded-2xl bg-gem-dark text-white p-5">
+                        <div class="text-sm opacity-90">Chờ Duyệt</div>
+                        <div id="statPending" class="mt-2 text-2xl font-bold text-amber-400">{{ pending_users }}</div>
+                    </div>
+                    <div class="rounded-2xl bg-gem-dark text-white p-5">
+                        <div class="text-sm opacity-90">Tổng Đơn Hàng</div>
+                        <div id="statOrders" class="mt-2 text-2xl font-bold">{{ order_count }}</div>
+                    </div>
+                    <div class="rounded-2xl bg-gem-dark text-white p-5">
+                        <div class="text-sm opacity-90">Tổng Thanh Toán</div>
+                        <div id="statPayments" class="mt-2 text-2xl font-bold">{{ payment_count }}</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Users Approval -->
+            <section id="section-users" class="hidden space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold">Duyệt Người Dùng</h2>
+                        <p class="text-sm text-slate-500 mt-1">Xét duyệt tài khoản mới đăng ký để họ có thể sử dụng hệ thống.</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <input id="userSearch" type="text" placeholder="Tìm user..." class="hidden md:block rounded-lg border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gem-mid"/>
+                        <button id="bulkApproveBtn" class="px-3 py-2 rounded-lg bg-orange-600 text-white text-sm hover:bg-orange-700 disabled:opacity-50">Duyệt Tất Cả</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200/70 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-50 text-slate-600">
+                                <tr class="text-left">
+                                    <th class="px-4 py-3">ID</th>
+                                    <th class="px-4 py-3">Tên</th>
+                                    <th class="px-4 py-3">Email</th>
+                                    <th class="px-4 py-3">Loại</th>
+                                    <th class="px-4 py-3">Trạng Thái</th>
+                                    <th class="px-4 py-3">Hành Động</th>
+                                </tr>
+                            </thead>
+                            <tbody id="usersTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="flex items-center justify-between px-4 py-3 bg-slate-50 text-sm text-slate-600 border-t border-slate-100">
+                        <div id="usersSummary">&nbsp;</div>
+                        <div class="flex items-center gap-2">
+                            <button id="refreshUsersBtn" class="px-3 py-1.5 rounded-lg border border-slate-200/70 bg-white hover:bg-slate-50">Làm Mới</button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Orders -->
+            <section id="section-orders" class="hidden space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold">Đơn Hàng</h2>
+                        <p class="text-sm text-slate-500 mt-1">Danh sách tất cả đơn hàng trong hệ thống.</p>
+                    </div>
+                    <button id="refreshOrdersBtn" class="px-3 py-2 rounded-lg border border-slate-200/70 bg-white hover:bg-slate-50 text-sm">Làm Mới</button>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200/70 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-50 text-slate-600">
+                                <tr class="text-left">
+                                    <th class="px-4 py-3">Mã</th>
+                                    <th class="px-4 py-3">User</th>
+                                    <th class="px-4 py-3">Trạng Thái</th>
+                                    <th class="px-4 py-3">Tổng Tiền</th>
+                                    <th class="px-4 py-3">Thanh Toán?</th>
+                                    <th class="px-4 py-3">Tạo Lúc</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ordersTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="flex items-center justify-between px-4 py-3 bg-slate-50 text-sm text-slate-600 border-t border-slate-100">
+                        <div id="ordersSummary">&nbsp;</div>
+                        <div>&nbsp;</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Payments -->
+            <section id="section-payments" class="hidden space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-xl font-bold">Thanh Toán</h2>
+                        <p class="text-sm text-slate-500 mt-1">Lịch sử giao dịch và trạng thái xử lý.</p>
+                    </div>
+                    <button id="refreshPaymentsBtn" class="px-3 py-2 rounded-lg border border-slate-200/70 bg-white hover:bg-slate-50 text-sm">Làm Mới</button>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200/70 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-sm">
+                            <thead class="bg-slate-50 text-slate-600">
+                                <tr class="text-left">
+                                    <th class="px-4 py-3">ID</th>
+                                    <th class="px-4 py-3">Đơn</th>
+                                    <th class="px-4 py-3">User</th>
+                                    <th class="px-4 py-3">Số Tiền</th>
+                                    <th class="px-4 py-3">Phương Thức</th>
+                                    <th class="px-4 py-3">Trạng Thái</th>
+                                    <th class="px-4 py-3">Tạo Lúc</th>
+                                </tr>
+                            </thead>
+                            <tbody id="paymentsTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="flex items-center justify-between px-4 py-3 bg-slate-50 text-sm text-slate-600 border-t border-slate-100">
+                        <div id="paymentsSummary">&nbsp;</div>
+                        <div>&nbsp;</div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<script>
+(function() {
+  // Sidebar navigation (anchors with data-target)
+  const navLinks = document.querySelectorAll('#admin-sidebar .sidebar-link');
+  const sections = ['section-overview','section-users','section-orders','section-payments'].map(id=>document.getElementById(id));
+  function showSection(id){
+    sections.forEach(sec=>{ if(sec.id===id){sec.classList.remove('hidden');} else {sec.classList.add('hidden');}});
+    navLinks.forEach(a=>{ if(a.dataset.target===id){a.classList.add('bg-orange-600','text-white');} else {a.classList.remove('bg-orange-600','text-white');} });
+  }
+  navLinks.forEach(a=>a.addEventListener('click', e=>{ e.preventDefault(); const target=a.dataset.target; if(target) showSection(target); }));
+  showSection('section-overview');
+
+  // CSRF helper
+  function getCookie(name){ const value=`; ${document.cookie}`; const parts=value.split(`; ${name}=`); if(parts.length===2) return parts.pop().split(';').shift(); }
+  const csrftoken = getCookie('csrftoken');
+
+  // Elements
+  const usersBody = document.getElementById('usersTableBody');
+  const ordersBody = document.getElementById('ordersTableBody');
+  const paymentsBody = document.getElementById('paymentsTableBody');
+  const usersSummary = document.getElementById('usersSummary');
+  const ordersSummary = document.getElementById('ordersSummary');
+  const paymentsSummary = document.getElementById('paymentsSummary');
+  const pendingBadge = document.getElementById('pendingUsersBadge');
+  const bulkApproveBtn = document.getElementById('bulkApproveBtn');
+  const refreshUsersBtn = document.getElementById('refreshUsersBtn');
+  const refreshOrdersBtn = document.getElementById('refreshOrdersBtn');
+  const refreshPaymentsBtn = document.getElementById('refreshPaymentsBtn');
+  const userSearchInput = document.getElementById('userSearch');
+
+  async function safeFetch(url, options={}){
+    try { const res = await fetch(url, options); if(!res.ok){ throw new Error(await res.text()||res.status); } return await res.json(); }
+    catch(err){ console.error('Fetch error', url, err); return { error: err.message }; }
+  }
+
+  function badge(status){
+    const map={pending:'bg-amber-500',processing:'bg-blue-600',completed:'bg-emerald-600',cancelled:'bg-red-600',refunded:'bg-indigo-600',success:'bg-emerald-600',failed:'bg-red-600'};
+    const cls=map[status]||'bg-slate-400';
+    return `<span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium text-white ${cls}">${status}</span>`;
+  }
+
+  let usersCache=[];
+  async function loadUsers(){
+    const data = await safeFetch('/api/users/');
+    if(data.error){ usersBody.innerHTML = `<tr><td colspan="6" class="px-4 py-3 text-red-600">${data.error}</td></tr>`; return; }
+    usersCache = data;
+    renderUsers();
+  }
+  function renderUsers(){
+    const term = (userSearchInput?.value||'').toLowerCase();
+    let pending=0;
+    const rows = usersCache.filter(u=>{
+      if(!term) return true;
+      return [u.email,u.first_name,u.last_name,u.username].some(v=> (v||'').toLowerCase().includes(term));
+    }).map(u=>{
+      if(!u.is_approved) pending++;
+      return `<tr class="hover:bg-slate-50" data-user-id="${u.id}">
+        <td class="px-4 py-2">${u.id}</td>
+        <td class="px-4 py-2">${(u.first_name||'') + ' ' + (u.last_name||'')}</td>
+        <td class="px-4 py-2">${u.email||''}</td>
+        <td class="px-4 py-2">${u.account_type||''}</td>
+        <td class="px-4 py-2">${u.is_approved ? '<span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-600 text-white">Đã duyệt</span>' : '<span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500 text-white">Chờ duyệt</span>'}</td>
+        <td class="px-4 py-2">${u.is_approved ? '' : `<button class="approve-btn px-3 py-1.5 rounded-lg bg-orange-600 text-white text-xs hover:bg-orange-700" data-id="${u.id}">Duyệt</button>`}</td>`;
+    }).join('');
+    usersBody.innerHTML = rows || '<tr><td colspan="6" class="px-4 py-3 text-slate-500">Không có kết quả</td></tr>';
+    usersSummary.textContent = `${usersCache.length} user(s), ${pending} chờ duyệt`;
+    pendingBadge.textContent = pending;
+    bulkApproveBtn.disabled = pending === 0;
+  }
+
+  async function approveUser(id){
+    await safeFetch(`/api/users/${id}/approve/`, { method:'POST', headers:{'X-CSRFToken': csrftoken} });
+  }
+
+  usersBody.addEventListener('click', e=>{
+    const btn = e.target.closest('.approve-btn');
+    if(btn){ btn.disabled=true; approveUser(btn.dataset.id).then(loadUsers); }
+  });
+
+  bulkApproveBtn.addEventListener('click', async ()=>{
+    const pendingIds = usersCache.filter(u=>!u.is_approved).map(u=>u.id);
+    bulkApproveBtn.disabled=true;
+    for(const id of pendingIds){ await approveUser(id); }
+    await loadUsers();
+  });
+
+  userSearchInput?.addEventListener('input', renderUsers);
+  refreshUsersBtn.addEventListener('click', loadUsers);
+
+  async function loadOrders(){
+    const data = await safeFetch('/api/orders/');
+    if(data.error){ ordersBody.innerHTML = `<tr><td colspan="6" class="px-4 py-3 text-red-600">${data.error}</td></tr>`; return; }
+    ordersBody.innerHTML = data.map(o=> `<tr class="hover:bg-slate-50">
+      <td class="px-4 py-2 font-mono">${o.order_id}</td>
+      <td class="px-4 py-2">${o.user_id??''}</td>
+      <td class="px-4 py-2">${badge(o.status)}</td>
+      <td class="px-4 py-2">${o.total_amount} ${o.currency}</td>
+      <td class="px-4 py-2">${o.is_paid ? '✅' : '❌'}</td>
+      <td class="px-4 py-2 text-xs text-slate-500">${new Date(o.created_at).toLocaleString('vi-VN')}</td>
+    </tr>`).join('');
+    ordersSummary.textContent = `${data.length} đơn hàng`;
+  }
+  refreshOrdersBtn.addEventListener('click', loadOrders);
+
+  async function loadPayments(){
+    const data = await safeFetch('/api/payments/');
+    if(data.error){ paymentsBody.innerHTML = `<tr><td colspan="7" class="px-4 py-3 text-red-600">${data.error}</td></tr>`; return; }
+    paymentsBody.innerHTML = data.map(p=> `<tr class="hover:bg-slate-50">
+      <td class="px-4 py-2">${p.id}</td>
+      <td class="px-4 py-2">${p.order_id??''}</td>
+      <td class="px-4 py-2">${p.user_id??''}</td>
+      <td class="px-4 py-2">${p.amount??''} ${p.currency}</td>
+      <td class="px-4 py-2">${p.method}</td>
+      <td class="px-4 py-2">${badge(p.status)}</td>
+      <td class="px-4 py-2 text-xs text-slate-500">${new Date(p.created_at).toLocaleString('vi-VN')}</td>
+    </tr>`).join('');
+    paymentsSummary.textContent = `${data.length} thanh toán`;
+  }
+  refreshPaymentsBtn.addEventListener('click', loadPayments);
+
+  // initial loads
+  loadUsers();
+  loadOrders();
+  loadPayments();
+})();
+</script>
+</body>
+</html>

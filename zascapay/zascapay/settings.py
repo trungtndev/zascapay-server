@@ -25,7 +25,8 @@ SECRET_KEY = 'django-insecure-4*wgx-mp!dgol!e5*5v_24h#3qm#n(0mbq=7)ryb7t7xez5=@&
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['zascapay-server.onrender.com', 'localhost', '127.0.0.1']
+# ALLOWED_HOSTS = ['zascapay-server.onrender.com', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ["*"]
 
 CSRF_TRUSTED_ORIGINS = [
     'https://zascapay-server.onrender.com',
@@ -43,8 +44,11 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Third-party
     'rest_framework',
+    'rest_framework.authtoken',  # DRF token auth
     # Local apps
-    'user',
+    'user.apps.UserConfig',  # ✅ load đúng AppConfig
+
+    # 'user',
     'product',
     'payment',
     'store',
@@ -57,6 +61,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    # Block unapproved users globally
+    'user.middleware.ApprovalRequiredMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
@@ -146,3 +152,13 @@ AUTH_USER_MODEL = 'user.User'
 # Media files (uploads)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}

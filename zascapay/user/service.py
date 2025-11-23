@@ -64,7 +64,8 @@ class UserService:
         UserService._assert_non_admin_payload(payload)
         user = UserService.get_user(user_id)
         # Only allow a limited set of fields to be updated
-        for field in ['username', 'email', 'first_name', 'last_name', 'is_active', 'phone', 'account_type', 'store_name', 'address']:
+        for field in ['username', 'email', 'first_name', 'last_name', 'is_active', 'phone', 'account_type',
+                      'store_name', 'address']:
             if field in payload and payload[field] is not None:
                 setattr(user, field, payload[field])
         if 'password' in payload and payload['password']:
@@ -81,9 +82,11 @@ class UserService:
 
     # --- Auth ---
     @staticmethod
-    def authenticate(identifier: str, password: str) -> User:
+    def authenticate(identifier: str, password: str, *, enforce_approval: bool = True) -> User:
         """
         Authenticate a user by username OR email and return the user if valid.
+        - If enforce_approval is True (default), unapproved users are rejected.
+        - If False, approval is ignored (used to allow custom post-login handling).
         Raises ValidationError on failure.
         """
         ident = (identifier or '').strip()
@@ -103,6 +106,8 @@ class UserService:
             raise ValidationError('Tài khoản đã bị vô hiệu hóa')
         if not user.check_password(password):
             raise ValidationError('Invalid credentials')
+        if enforce_approval and not getattr(user, 'is_approved', False):
+            raise ValidationError('Tài khoản của bạn chưa được admin duyệt')
         return user
 
     # --- Registration ---
@@ -174,13 +179,34 @@ class UserService:
             last_name=last_name,
             phone=phone,
             account_type=account_type,
-            store_name=store_name,
-            address=address,
+            # store_name=store_name,
+            # address=address,
             is_staff=False,
             is_superuser=False,
+            is_approved=False,
         )
         user.set_password(password)
-        # Let model validation run (respects email uniqueness, choices etc.)
         user.full_clean(exclude=['password'])
         user.save()
+        if account_type == 'store':
+            from store.models import Store, StoreCategory
+            def generate_store_code(store_name: str) -> str:
+                base_code = re.sub(r'[^a-zA-Z0-9]', '', store_name).lower()
+                candidate = base_code
+                idx = 1
+                while Store.objects.filter(code=candidate).exists():
+                    idx += 1
+                    candidate = f"{base_code}{idx}"
+                return candidate
+
+            # Ví dụ: gán category mặc định nếu chưa chọn
+            default_category, _ = StoreCategory.objects.get_or_create(name='Khác')
+            Store.objects.create(
+                name=store_name,
+                address=address,
+                owner=user,
+                code=generate_store_code(store_name),
+                category=default_category,
+                status=Store.Status.ACTIVE
+            )
         return user

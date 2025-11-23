@@ -35,3 +35,7 @@ python manage.py migrate --noinput --fake
 #python manage.py add_products_from_yolo --file ../yolo_names.json --random-price
 #echo "🔥 Starting  server..."
 #python manage.py runserver 0.0.0.0:8888
+
+
+python manage.py makemigrations
+python manage.py migrate
