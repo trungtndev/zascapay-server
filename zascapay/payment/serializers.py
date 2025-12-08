@@ -24,12 +24,21 @@ class OrderSerializer(serializers.ModelSerializer):
     order_id = serializers.IntegerField(read_only=True)
     items = OrderItemSerializer(many=True, read_only=True)
     user_id = serializers.IntegerField(read_only=True)
+    # new: readable username/full name for admin dashboard
+    user_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Order
         # expose order_id instead of default `id`
-        fields = ['order_id', 'user_id', 'status', 'total_amount', 'currency', 'shipping_address', 'is_paid', 'metadata', 'created_at', 'updated_at', 'items']
+        fields = ['order_id', 'user_id', 'user_name', 'status', 'total_amount', 'currency', 'shipping_address', 'is_paid', 'metadata', 'created_at', 'updated_at', 'items']
         read_only_fields = ['order_id', 'created_at', 'updated_at', 'is_paid', 'total_amount']
+
+    def get_user_name(self, obj):
+        user = getattr(obj, 'user', None)
+        if not user:
+            return None
+        full_name = (user.get_full_name() or '').strip()
+        return full_name or user.username
 
 
 class OrderCreateItemSerializer(serializers.Serializer):
@@ -58,16 +67,26 @@ class PaymentSerializer(serializers.ModelSerializer):
     amount = serializers.SerializerMethodField()
     # include purchased items from the related order (compact fields)
     items = PaymentItemSerializer(source='order.items', many=True, read_only=True)
+    # new: expose user_name from related order->user for admin dashboard
+    user_name = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Payment
-        fields = ['id', 'order_id', 'store_id', 'amount', 'items', 'currency', 'method', 'provider_transaction_id', 'status', 'processed_at', 'created_at', 'metadata']
+        fields = ['id', 'order_id', 'store_id', 'user_name', 'amount', 'items', 'currency', 'method', 'provider_transaction_id', 'status', 'processed_at', 'created_at', 'metadata']
         read_only_fields = ['id', 'status', 'processed_at', 'created_at']
 
     def get_amount(self, obj):
         if obj.order:
             return obj.order.total_amount
         return None
+
+    def get_user_name(self, obj):
+        order = getattr(obj, 'order', None)
+        user = getattr(order, 'user', None) if order else None
+        if not user:
+            return None
+        full_name = (user.get_full_name() or '').strip()
+        return full_name or user.username
 
 
 class PaymentCreateSerializer(serializers.Serializer):

@@ -187,6 +187,21 @@
     return `<span class="inline-block px-2 py-0.5 rounded-full text-xs font-medium text-white ${cls}">${status}</span>`;
   }
 
+  // Format money value as thousands of VND.
+  // Business rule: value from DB is in "nghìn đồng".
+  // Example: 20.00 -> 20.000 VND, 31.61 -> 31.610 VND
+  function formatMoneyVND(value){
+    if (value === null || value === undefined || value === '') return '';
+    let num = Number(value);
+    if (Number.isNaN(num)) return '';
+
+    // Convert from thousands to actual VND amount
+    const vndAmount = num * 1000;
+
+    // Always show as integer with thousand separators
+    return vndAmount.toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' VND';
+  }
+
   let usersCache=[];
   async function loadUsers(){
     const data = await safeFetch('/api/users/');
@@ -238,14 +253,18 @@
   async function loadOrders(){
     const data = await safeFetch('/api/orders/');
     if(data.error){ ordersBody.innerHTML = `<tr><td colspan="6" class="px-4 py-3 text-red-600">${data.error}</td></tr>`; return; }
-    ordersBody.innerHTML = data.map(o=> `<tr class="hover:bg-slate-50">
+    ordersBody.innerHTML = data.map(o=> {
+      const userLabel = o.user_name || o.user_id || '';
+      const amountLabel = formatMoneyVND(o.total_amount);
+      return `<tr class="hover:bg-slate-50">
       <td class="px-4 py-2 font-mono">${o.order_id}</td>
-      <td class="px-4 py-2">${o.user_id??''}</td>
+      <td class="px-4 py-2">${userLabel}</td>
       <td class="px-4 py-2">${badge(o.status)}</td>
-      <td class="px-4 py-2">${o.total_amount} ${o.currency}</td>
+      <td class="px-4 py-2">${amountLabel}</td>
       <td class="px-4 py-2">${o.is_paid ? '✅' : '❌'}</td>
       <td class="px-4 py-2 text-xs text-slate-500">${new Date(o.created_at).toLocaleString('vi-VN')}</td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
     ordersSummary.textContent = `${data.length} đơn hàng`;
   }
   refreshOrdersBtn.addEventListener('click', loadOrders);
@@ -253,15 +272,19 @@
   async function loadPayments(){
     const data = await safeFetch('/api/payments/');
     if(data.error){ paymentsBody.innerHTML = `<tr><td colspan="7" class="px-4 py-3 text-red-600">${data.error}</td></tr>`; return; }
-    paymentsBody.innerHTML = data.map(p=> `<tr class="hover:bg-slate-50">
+    paymentsBody.innerHTML = data.map(p=> {
+      const userLabel = p.user_name || p.user_id || '';
+      const amountLabel = formatMoneyVND(p.amount);
+      return `<tr class="hover:bg-slate-50">
       <td class="px-4 py-2">${p.id}</td>
       <td class="px-4 py-2">${p.order_id??''}</td>
-      <td class="px-4 py-2">${p.user_id??''}</td>
-      <td class="px-4 py-2">${p.amount??''} ${p.currency}</td>
+      <td class="px-4 py-2">${userLabel}</td>
+      <td class="px-4 py-2">${amountLabel}</td>
       <td class="px-4 py-2">${p.method}</td>
       <td class="px-4 py-2">${badge(p.status)}</td>
       <td class="px-4 py-2 text-xs text-slate-500">${new Date(p.created_at).toLocaleString('vi-VN')}</td>
-    </tr>`).join('');
+    </tr>`;
+    }).join('');
     paymentsSummary.textContent = `${data.length} thanh toán`;
   }
   refreshPaymentsBtn.addEventListener('click', loadPayments);
