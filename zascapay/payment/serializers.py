@@ -26,6 +26,9 @@ class OrderSerializer(serializers.ModelSerializer):
     user_id = serializers.IntegerField(read_only=True)
     # new: readable username/full name for admin dashboard
     user_name = serializers.SerializerMethodField(read_only=True)
+    # format timestamps in DB-style string
+    created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S.%f', read_only=True)
+    updated_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S.%f', read_only=True)
 
     class Meta:
         model = Order
@@ -69,6 +72,9 @@ class PaymentSerializer(serializers.ModelSerializer):
     items = PaymentItemSerializer(source='order.items', many=True, read_only=True)
     # new: expose user_name from related order->user for admin dashboard
     user_name = serializers.SerializerMethodField(read_only=True)
+    # format timestamps in DB-style string
+    created_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S.%f', read_only=True)
+    processed_at = serializers.DateTimeField(format='%Y-%m-%d %H:%M:%S.%f', read_only=True, required=False, allow_null=True)
 
     class Meta:
         model = Payment

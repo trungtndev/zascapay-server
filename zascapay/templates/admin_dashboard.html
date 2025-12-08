@@ -97,7 +97,6 @@
                                     <th class="px-4 py-3">Trạng Thái</th>
                                     <th class="px-4 py-3">Tổng Tiền</th>
                                     <th class="px-4 py-3">Thanh Toán?</th>
-                                    <th class="px-4 py-3">Tạo Lúc</th>
                                 </tr>
                             </thead>
                             <tbody id="ordersTableBody"></tbody>
@@ -194,12 +193,20 @@
     if (value === null || value === undefined || value === '') return '';
     let num = Number(value);
     if (Number.isNaN(num)) return '';
-
-    // Convert from thousands to actual VND amount
     const vndAmount = num * 1000;
-
-    // Always show as integer with thousand separators
     return vndAmount.toLocaleString('vi-VN', { maximumFractionDigits: 0 }) + ' VND';
+  }
+
+  // Format created_at like DB-style string: 'YYYY-MM-DD HH:MM:SS.ffffff'
+  // Input example from API: '2025-12-06T20:43:20.417000+07:00'
+  // Output shown:              '2025-12-06 20:43:20.417000'
+  function formatCreatedAt(raw){
+    if (!raw) return '';
+    const s = String(raw);
+    return s
+      .replace('T', ' ')
+      .replace(/([+-]\d{2}:?\d{2})$/, '')
+      .replace(/Z$/, '');
   }
 
   let usersCache=[];
@@ -252,17 +259,17 @@
 
   async function loadOrders(){
     const data = await safeFetch('/api/orders/');
-    if(data.error){ ordersBody.innerHTML = `<tr><td colspan="6" class="px-4 py-3 text-red-600">${data.error}</td></tr>`; return; }
+    if(data.error){ ordersBody.innerHTML = `<tr><td colspan="5" class="px-4 py-3 text-red-600">${data.error}</td></tr>`; return; }
     ordersBody.innerHTML = data.map(o=> {
-      const userLabel = o.user_name || o.user_id || '';
-      const amountLabel = formatMoneyVND(o.total_amount);
+      const orderCode = o.order_id || o.id || '';
+      const userLabel = o.user_name || o.user || o.user_id || '';
+      const amountLabel = formatMoneyVND(o.total_amount ?? o.amount ?? o.total);
       return `<tr class="hover:bg-slate-50">
-      <td class="px-4 py-2 font-mono">${o.order_id}</td>
+      <td class="px-4 py-2 font-mono">${orderCode}</td>
       <td class="px-4 py-2">${userLabel}</td>
       <td class="px-4 py-2">${badge(o.status)}</td>
       <td class="px-4 py-2">${amountLabel}</td>
       <td class="px-4 py-2">${o.is_paid ? '✅' : '❌'}</td>
-      <td class="px-4 py-2 text-xs text-slate-500">${new Date(o.created_at).toLocaleString('vi-VN')}</td>
     </tr>`;
     }).join('');
     ordersSummary.textContent = `${data.length} đơn hàng`;
@@ -282,7 +289,7 @@
       <td class="px-4 py-2">${amountLabel}</td>
       <td class="px-4 py-2">${p.method}</td>
       <td class="px-4 py-2">${badge(p.status)}</td>
-      <td class="px-4 py-2 text-xs text-slate-500">${new Date(p.created_at).toLocaleString('vi-VN')}</td>
+      <td class="px-4 py-2 text-xs text-slate-500">${formatCreatedAt(p.created_at)}</td>
     </tr>`;
     }).join('');
     paymentsSummary.textContent = `${data.length} thanh toán`;
