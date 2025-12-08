@@ -76,6 +76,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"Product {class_name} (SKU: {sku}) đã tồn tại")
 
             detection, detection_created = Detection.objects.get_or_create(
+                id=int(idx),
                 name=class_name,
                 product=product,
                 defaults={"accuracy": 0}

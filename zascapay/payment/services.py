@@ -6,6 +6,7 @@ from typing import List, Dict, Optional
 
 from .models import Order, OrderItem, Payment
 from product.models import Product
+from store.models import StoreInventory
 
 
 class PaymentService:
@@ -100,8 +101,8 @@ class OrderService:
     def create_order(user, items: List[Dict], shipping_address: Optional[str] = None, currency: str = 'VND', metadata: Optional[dict] = None) -> Order:
         """Create an Order and its OrderItems.
 
-        `items` is a list of dicts with keys: product_id (int), quantity (int), optional unit_price (Decimal).
-        If unit_price is absent, product.price is used.
+        `items` is a list of dicts with keys: product_id (int), quantity (int).
+        Unit price is always resolved from StoreInventory for the user's store.
         """
         if not items:
             raise ValueError('Order must contain at least one item')
@@ -110,9 +111,15 @@ class OrderService:
         product_ids = [int(it['product_id']) for it in items]
         products = {p.id: p for p in Product.objects.filter(id__in=product_ids)}
 
+        # Determine the store of the user (assumes one active store per owner)
+        from store.models import Store
+        store = Store.objects.filter(owner=user, is_deleted=False, status=Store.Status.ACTIVE).first()
+        if not store:
+            raise ValueError('User does not own an active store to place orders from')
+
         total = Decimal('0')
-        # Pre-validate items and compute total
         prepared = []
+
         for it in items:
             pid = int(it['product_id'])
             qty = int(it.get('quantity', 1))
@@ -121,7 +128,14 @@ class OrderService:
             prod = products.get(pid)
             if not prod:
                 raise ValueError(f'Product {pid} not found')
-            unit_price = Decimal(str(it.get('unit_price'))) if it.get('unit_price') is not None else prod.price
+
+            # Get price from StoreInventory for this store and product
+            try:
+                inventory = StoreInventory.objects.get(store=store, product=prod)
+            except StoreInventory.DoesNotExist:
+                raise ValueError(f'Product {pid} is not available in the store inventory')
+
+            unit_price = inventory.price
             line_total = unit_price * qty
             total += line_total
             prepared.append((prod, qty, unit_price, line_total))

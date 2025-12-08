@@ -62,7 +62,7 @@ class Product(models.Model):
 class Detection(models.Model):
     """Class detection được phát hiện bởi YOLO, liên kết tới `Product`. Không liên kết tới `store`.
     """
-    id = models.AutoField(primary_key=True)
+    id = models.IntegerField(primary_key=True)
     name = models.CharField(max_length=200)
     accuracy = models.DecimalField(
         max_digits=5,
